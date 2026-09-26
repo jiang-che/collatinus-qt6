@@ -58,17 +58,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install build dependencies
         run: |
-          dnf install -y rpm-build dnf-plugins-core redhat-rpm-config \
+          dnf install -y git rpm-build dnf-plugins-core redhat-rpm-config \
             cmake-rpm-macros gcc-plugin-annobin desktop-file-utils appstream
           dnf builddep -y packaging/rpm/collatinus-qt6.spec
       - name: Build RPMs
         env:
-          RPMBUILD_TOPDIR: ${{ github.workspace }}/rpmbuild
-        run: scripts/build-rpm.sh
+          RPMBUILD_TOPDIR: /tmp/rpmbuild
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          scripts/build-rpm.sh
       - name: Collect RPMs
         run: |
           mkdir -p dist
-          find rpmbuild/RPMS rpmbuild/SRPMS -name '*.rpm' -exec cp -t dist {} +
+          find /tmp/rpmbuild/RPMS /tmp/rpmbuild/SRPMS -name '*.rpm' -exec cp -t dist {} +
       - uses: actions/upload-artifact@v4
         with:
           name: rpm

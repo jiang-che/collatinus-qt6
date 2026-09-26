@@ -8,8 +8,8 @@
 #
 #   mock -r fedora-rawhide-x86_64 packaging/rpm/collatinus-qt6.spec
 #
-# The wrapper stages a source tarball built from git HEAD into a temporary
-# rpmbuild tree, so the working directory is not polluted.
+# The script stages a source tarball (with a fixed top-level directory) into a
+# temporary rpmbuild tree, so the working directory is not polluted.
 
 set -eu
 
@@ -18,20 +18,35 @@ root=$(cd "$here/.." && pwd)
 
 name=collatinus-qt6
 # Keep in sync with CMakeLists.txt and packaging/rpm/%{name}.spec.
-version=12.3.0
+version=$(sed -n 's/^[[:space:]]*VERSION[[:space:]]*\([0-9][0-9.]*\).*/\1/p' \
+    "$root/CMakeLists.txt" | head -1)
+if [ -z "$version" ]; then
+    echo "cannot determine the version from CMakeLists.txt" >&2
+    exit 1
+fi
 
 top=${RPMBUILD_TOPDIR:-$(mktemp -d /tmp/rpmbuild.XXXXXX)/rpmbuild}
 mkdir -p "$top/BUILD" "$top/BUILDROOT" "$top/RPMS" "$top/SOURCES" "$top/SPECS" "$top/SRPMS"
 
-if [ -d "$root/.git" ]; then
-    (cd "$root" && git archive --format=tar --prefix="$name-$version/" HEAD) \
-        | gzip -9 > "$top/SOURCES/$name-$version.tar.gz"
+# Stage the sources under "collatinus-qt6-<version>/" and archive the staged
+# directory.  This guarantees the expected top-level directory and avoids
+# archiving the output tarball itself (the source must therefore live outside
+# the staged directory).
+stage=$(mktemp -d /tmp/collatinus-src.XXXXXX)
+trap 'rm -rf "$stage"' EXIT INT TERM
+mkdir -p "$stage/$name-$version"
+
+if command -v git >/dev/null 2>&1 && [ -d "$root/.git" ]; then
+    ( cd "$root" && git archive --format=tar HEAD ) \
+        | tar -x -C "$stage/$name-$version"
 else
-    (cd "$root" && tar --exclude=.git -cf - .) \
-        | gzip -9 > "$top/SOURCES/$name-$version.tar.gz"
+    ( cd "$root" && tar --exclude=.git --exclude=./rpmbuild -cf - . ) \
+        | tar -x -C "$stage/$name-$version"
 fi
+
+tar -C "$stage" -czf "$top/SOURCES/$name-$version.tar.gz" "$name-$version"
 
 cp "$root/packaging/rpm/$name.spec" "$top/SPECS/"
 
 echo "rpmbuild tree: $top"
-exec rpmbuild -ba --define "_topdir $top" "$top/SPECS/$name.spec" "$@"
+rpmbuild -ba --define "_topdir $top" "$top/SPECS/$name.spec" "$@"
