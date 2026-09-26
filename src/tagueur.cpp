@@ -3,23 +3,24 @@
  *  This file is part of COLLATINUS.
  *
  *  COLLATINUS is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Lesser GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  COLLATINVS is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  Lesser GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the Lesser GNU General Public License
  *  along with COLLATINUS; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * © Yves Ouvrard, 2009 - 2016
+ * © Philippe verkerk, 2009 - 2019
  */
 
 #include "tagueur.h"
+#include "paths.h"
 
 /**
  * @brief Tagueur::Tagueur :
@@ -114,10 +115,15 @@ Tagueur::Tagueur(QObject *parent, LemCore *l, QString cible, QString resDir) : Q
     }
     else _lemCore = l;
     if (resDir == "")
-        _resDir = qApp->applicationDirPath() + "/data/";
+        _resDir = Paths::instance().coreDataDir();
     else if (resDir.endsWith("/")) _resDir = resDir;
     else _resDir = resDir + "/";
     if (cible != "") _lemCore->setCible(cible);
+}
+
+void Tagueur::changeCore(LemCore* l)
+{
+	_lemCore = l;
 }
 
 /**
@@ -238,7 +244,7 @@ Tagueur::Tagueur(QObject *parent, LemCore *l, QString cible, QString resDir) : Q
 QString Tagueur::tagTexte(QString t, int p, bool affTout, bool majPert, bool affHTML)
 {
     // éliminer les chiffres et les espaces surnuméraires
-    t.remove(QRegExp("\\d"));
+    t.remove(QRegularExpression("\\d"));
 //    t = t.simplified(); // Rmq : perd les retours de ligne !
     int tl = t.length() - 1;
     const QString pp = ".;!?";
@@ -274,7 +280,7 @@ QString Tagueur::tagTexte(QString t, int p, bool affTout, bool majPert, bool aff
         if ((fph == tl) && !pp.contains(t.at(tl)) && (t.mid(tl,1) != "\n"))
             phr.append(t[tl]);
         // découpage en mots
-        QStringList lm = phr.split(QRegExp("\\b"));
+        QStringList lm = phr.split(QRegularExpression("\\b"));
 
         if (lm.size() > 1)
         {
@@ -288,7 +294,7 @@ QString Tagueur::tagTexte(QString t, int p, bool affTout, bool majPert, bool aff
                 phr = t.mid(dph, fph - dph).trimmed();
                 if ((fph == tl) && !pp.contains(t.at(tl)) && (t.mid(tl,1) != "\n"))
                     phr.append(t[tl]);
-                lm = phr.split(QRegExp("\\b"));
+                lm = phr.split(QRegularExpression("\\b"));
             }
 
             QList<Mot*> mots;

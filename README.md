@@ -1,49 +1,72 @@
-# Collatinus 11
+# Collatinus-Qt6
 
-The currently availlable version is the version 11.2, from the "Medieval" branch.
+Collatinus-Qt6 is an unofficial Linux fork of Collatinus, the Latin
+lemmatiser, morphological analyser, dictionary and scansion tool written by
+Yves Ouvrard and Philippe Verkerk with other contributors.
 
-Sources of Collatinus software, the Latin lemmatizer, morphological analyzer and scansion tool.
-Sources of version 10 are available on [collatinus-10-src](https://github.com/biblissima/collatinus-10-src).
+The Latin engine and its data are kept as they are. What changes is the
+desktop application and the way it builds and installs on current Linux
+systems. This is not an official release of the original project.
 
-**Collatinus is a free, open source and multi-OS software (Mac, Windows et Debian GNU/Linux), that is easy to install and use.**
+This fork is created and maintained by Che JIANG (蒋澈), Department of the
+History of Science, Tsinghua University. Contact: jiang@fastmail.net or
+jiangche@tsinghua.edu.cn.
 
-**Download page on the Biblissima website**: [http://outils.biblissima.fr/en/collatinus/](http://outils.biblissima.fr/en/collatinus/) (binaries available for Mac OS, GNU/Linux and Windows).
+## What is different here
 
-Collatinus is both a **lemmatiser** and a **morphological analyser for Latin texts**: if a conjugated or declined form of a word is entered, it is capable of finding the correct root word to search for in the dictionary and then displaying its translation into another language, its different meanings, and any other information usually found in dictionaries. 
+- Qt 5 to Qt 6.
+- qmake to CMake (Ninja or Make).
+- QuaZip 0.x/5 to the system QuaZip 1.x for Qt 6.
+- Desktop entry, icons, AppStream metadata, man page, standard data paths,
+  and `.deb` and `.rpm` packages.
+- A Simplified-Chinese user interface.
 
-In practice, Collatinus will be useful mostly for Latin teachers and professors who can quickly generate a complete lexical aid for any text and distribute it to their students. Students often use Collatinus as a reference when reading Latin texts, as they develop their vocabulary and language skills. 
+## Chinese
 
-## Main features
+The interface can be set to Simplified Chinese, including the grammatical
+terms. There is no Chinese dictionary in this release. The interface
+language and the dictionary language are separate, so Chinese can be used
+with the existing English, French, German and other dictionaries.
 
-* lemmatise a Latin word or a full Latin text
-* translate lemmas using the Latin dictionaries included in the application
-* display syllable quantities (long and short syllables) and inflection (declension and conjugation)
+## Source basis
 
-## Project History
+Based on the Collatinus 12.3 source preserved by Debian, including the
+Debian 12.3-2 packaging fixes.
 
-Originally, Collatinus was meant to produce printed documents, and it is still used for this purpose. Further improvements and adjustments were made when it became apparent that many people were using it for other purposes:
+## Build
 
-1. as a lexical and morphological reference when reading a Latin text disposer,
-2. for lexical and stylistic searches,
-3. to provide students with exercises based on Latin texts.
+Needs a C++17 compiler, CMake, Ninja or Make, Qt 6 development packages
+(Core, Gui, Widgets, Network, Svg, PrintSupport, LinguistTools) and QuaZip
+1.x for Qt 6.
 
+```sh
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+./build/bin/collatinus                 # run a development build
+sudo cmake --install build             # install
+```
 
-## How it Works
+The data directory can be chosen with `--data-dir PATH` or the
+`COLLATINUS_DATA_DIR` environment variable.
 
-Unlike the majority of lemmatisers, which use lists of inflected forms, Collatinus uses a lexicon containing the lemmas and all the necessary information for their inflection. The advantage to this approach is that Collatinus, with its 11,000 lemmas, is capable of recognising over half a million forms. Adding lemmas with spelling variants (such as medieval spellings, for example) would make it possible to recognise all of their inflected forms as well.
+## Packages
 
-Starting from a lemma and its associated flexional endings, Collatinus is also capable of displaying the corresponding inflection tables, which Latin learners may find useful.
+- Debian and Ubuntu: `debian/`, built with `dpkg-buildpackage -us -uc -b`
+  (helper: `scripts/build-deb.sh`).
+- Fedora and RPM: `packaging/rpm/collatinus-qt6.spec`, built with
+  `rpmbuild -ba` (helper: `scripts/build-rpm.sh`).
+- Source tarball: `scripts/build-source-tarball.sh TAG`.
 
-Finally, when syllable quantities are known for a given lemma, Collatinus can scan the word and even the entire text. When scanning a text, Collatinus applies the usual rules of elision and hiatus.
+Both packages install `/usr/bin/collatinus`, so they conflict with a
+distribution collatinus package.
 
-## Documentation
-The help pages of Collatinus are also available on the
-[web site of Biblissima](https://outils.biblissima.fr/fr/collatinus/aide/).
+## License
 
-The technical documentation collected with [Doxygen](https://www.doxygen.nl/index.html)
-can be found on the [web site of Biblissima](https://outils.biblissima.fr/fr/collatinus/doc/).
-Of course, any developer can collect it also from the sources.
+LGPL-3.0-or-later. Collatinus was relicensed from GPL-3 to LGPL-3 by its
+author, Yves Ouvrard. The change is recorded in the Debian Collatinus 12.3-2
+source package. The original copyright and authorship notices are kept.
 
-## Licence
+## Bugs
 
-Collatinus is developed and maintained by Yves Ouvrard and Philippe Verkerk. It is made available under the [GNU GPL v3](http://www.gnu.org/licenses/gpl.html) licence.
+Please report problems with this fork (Qt 6 port, build, packaging, Chinese
+interface) here, not to the original Collatinus maintainers.

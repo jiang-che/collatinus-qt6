@@ -3,23 +3,24 @@
  *  This file is part of COLLATINUS.
  *
  *  COLLATINUS is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Lesser GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  COLLATINVS is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  Lesser GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the Lesser GNU General Public License
  *  along with COLLATINUS; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * © Yves Ouvrard, 2009 - 2016
+ * © Yves Ouvrard, Philippe Verkerk, 2009 - 2019
  */
 
 #include "scandeur.h"
+#include "paths.h"
 
 /**
  * @brief Scandeur::Scandeur
@@ -83,11 +84,16 @@ Scandeur::Scandeur(QObject *parent, LemCore *l, QString resDir) : QObject(parent
     }
     else _lemCore = l;
     if (resDir == "")
-        _resDir = qApp->applicationDirPath() + "/data/";
+        _resDir = Paths::instance().coreDataDir();
     else if (resDir.endsWith("/")) _resDir = resDir;
     else _resDir = resDir + "/";
     lisParPos();
 
+}
+
+void Scandeur::changeCore(LemCore* l)
+{
+	_lemCore = l;
 }
 
 
@@ -120,8 +126,9 @@ void Scandeur::lisParPos()
     QStringList rr;
     foreach (QString ligne, lignes)
     {
-        rr = ligne.split(";");
-        _reglesp.append(Reglep(QRegExp(rr.at(0)), rr.at(1)));
+        //rr = ligne.split(";");
+        //_reglesp.append(Reglep(QRegularExpression(rr.at(0)), rr.at(1)));
+        _reglesp.append(new RegleVG(ligne));
     }
 }
 
@@ -164,8 +171,8 @@ QString Scandeur::parPos(QString f)
 {
     bool maj = f.at(0).isUpper();
     f = f.toLower();
-    foreach (Reglep r, _reglesp)
-        f.replace(r.first, r.second);
+    foreach (RegleVG* r, _reglesp)
+        f = r->transf(f);
     if (maj) f[0] = f[0].toUpper();
     return f;
 }
@@ -527,7 +534,7 @@ QString Scandeur::scandeTxt(QString texte, int accent, bool stats, bool majAut)
         if (ligne.isEmpty())
             separ.append(ligne);
         else
-            separ = ligne.split(QRegExp("\\b"));
+            separ = ligne.split(QRegularExpression("\\b"));
         if (separ.count() > 0 && separ.at(0).count() > 0 &&
             separ.at(0).at(0).isLetter())
             separ.prepend("");

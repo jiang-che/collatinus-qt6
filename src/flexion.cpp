@@ -3,20 +3,20 @@
  *  This file is part of COLLATINUS.
  *
  *  COLLATINUS is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Lesser GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  COLLATINVS is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  Lesser GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the Lesser GNU General Public License
  *  along with COLLATINUS; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * © Yves Ouvrard, 2009 - 2016
+ * © Yves Ouvrard, 2009 - 2019
  */
 
 #include "flexion.h"
@@ -40,26 +40,6 @@ const QString Flexion::linb = "</td><td>";
 const QString Flexion::linc = "</td></tr>";
 const QString Flexion::queue = "</table>";
 
-/*const QStringList Flexion::cas = QStringList() << "nominatif"
-                                               << "vocatif"
-                                               << "accusatif"
-                                               << "génitif"
-                                               << "datif"
-                                               << "ablatif";
-
-const QStringList Flexion::genres = QStringList() << "masculin"
-                                                  << "féminin"
-                                                  << "neutre";
-const QStringList Flexion::nombres = QStringList() << "singulier"
-                                                   << "pluriel";
-
-const QStringList Flexion::temps = QStringList() << "présent"
-                                                 << "imparfait"
-                                                 << "futur"
-                                                 << "parfait"
-                                                 << "plus-que-parfait"
-                                                 << "futur antérieur";
-*/
 QString Flexion::entreParenth(QString e)
 {
     return QString("(%1)").arg(e);
@@ -74,7 +54,7 @@ QString Flexion::entreParenth(QString e)
  */
 QString Flexion::forme(int n, bool label)
 {
-    if (_lemme == 0) return "lemme absent";
+    if (_lemme == 0) return tr("lemme absent");
     Modele *m = _lemme->modele();
     QList<Desinence *> ld = m->desinences(n);
     if (ld.empty()) return "-";
@@ -135,7 +115,7 @@ void Flexion::setLemme(Lemme *l)
  */
 QString Flexion::tableau(Lemme *l)
 {
-    if (l == 0) return "lemme absent\n";
+    if (l == 0) return tr("lemme absent") + "\n";
     setLemme(l);
     QStringList ret;
     QString pos = l->pos();

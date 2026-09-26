@@ -1,0 +1,42 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Collatinus
+Upstream-Contact: Yves Ouvrard <yves.ouvrard@collatinus.org>
+Source: https://github.com/jiang-che/collatinus-qt6
+
+Files: *
+Copyright:
+ 2003-2026 Yves Ouvrard <yves.ouvrard@collatinus.org>
+ 2016-2020 Philippe Verkerk
+License: LGPL-3.0-or-later
+
+Files: debian/*
+Copyright:
+ 2026 Jiang Che <jiang@fastmail.com>
+License: LGPL-3.0-or-later
+
+License: LGPL-3.0-or-later
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 3 of the License, or (at your option) any later version.
+ .
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+ .
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library.  If not, see
+ <https://www.gnu.org/licenses/>.
+Comment:
+ On Debian systems, the complete text of the GNU Lesser General Public
+ License can be found in /usr/share/common-licenses/LGPL-3.
+ .
+ Collatinus was relicensed from GPL-3 to LGPL-3 in 2026 by its author
+ Yves Ouvrard (signed e-mail, Message-ID
+ <afxGKBy05dBGxC9Y@collatinus.org>, 2026-05-07); see the git history of
+ LICENSE and the license headers of the source files.
+ .
+ Third-party lexical data and dictionaries that Collatinus can download at
+ run time are not part of this package and keep their own licences; they
+ must be audited separately before redistribution.

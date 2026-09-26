@@ -1,0 +1,39 @@
+Source: collatinus-qt6
+Section: text
+Priority: optional
+Maintainer: Jiang Che <jiang@fastmail.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ cmake,
+ ninja-build,
+ pkgconf,
+ g++,
+ qt6-base-dev,
+ qt6-svg-dev,
+ qt6-tools-dev,
+ qt6-l10n-tools,
+ libquazip1-qt6-dev,
+Standards-Version: 4.7.3
+Rules-Requires-Root: no
+Homepage: https://github.com/jiang-che/collatinus-qt6
+Vcs-Browser: https://github.com/jiang-che/collatinus-qt6
+Vcs-Git: https://github.com/jiang-che/collatinus-qt6.git
+
+Package: collatinus-qt6
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Conflicts:
+ collatinus,
+Description: Latin lemmatiser, morphological analyser and scansion tool
+ Collatinus lemmatises Latin texts: for every word it gives the canonic
+ form (lemma), the morphology (case, number, gender, person, tense, mood,
+ voice) and a translation.  It can also generate inflected forms, tag parts
+ of speech and scan verse.
+ .
+ This package is a Qt 6 / CMake modernization of Collatinus 12.3 with a
+ Simplified-Chinese interface and morphology labels.
+ .
+ It provides the same /usr/bin/collatinus executable as the official
+ `collatinus` package, so the two cannot be installed at the same time.

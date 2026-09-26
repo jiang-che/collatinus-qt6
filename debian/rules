@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+export DH_VERBOSE = 1
+
+%:
+	dh $@ --buildsystem=cmake+ninja
+
+# No CTest suite is shipped with the source, so do not let dh_auto_test look
+# for a "test" target in the CMake build.
+override_dh_auto_test:

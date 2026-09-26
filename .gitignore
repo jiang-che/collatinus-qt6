@@ -48,3 +48,36 @@ bin/data/dicos/Lewis_and_Short_1879-mai16.col
 bin/data/dicos/Quicherat_1836.cfg
 bin/data/dicos/Quicherat_1836.djvu
 bin/data/dicos/Quicherat_1836.idx
+
+debian/files
+
+# CMake build trees
+build/
+build*/
+
+# Debian packaging build artefacts
+/debian/files
+/debian/.debhelper/
+/debian/debhelper-build-stamp
+/debian/collatinus-qt6/
+/debian/*.substvars
+/debian/*.debhelper
+/obj-*/
+/*.deb
+/*.buildinfo
+/*.changes
+/*.dsc
+/*.tar.xz
+/*.tar.gz
+
+# The upstream "*build-*" rule would hide the packaging helpers.
+!scripts/build-deb.sh
+!scripts/build-rpm.sh
+!scripts/build-source-tarball.sh
+
+# Fedora RPM build artefacts
+/*.rpm
+/rpmbuild/
+
+# CI workflows (the upstream ".*" rule would hide .github/)
+!.github/

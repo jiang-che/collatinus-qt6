@@ -3,33 +3,33 @@
  *  This file is part of COLLATINUS.
  *
  *  COLLATINUS is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Lesser GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  COLLATINVS is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  Lesser GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the Lesser GNU General Public License
  *  along with COLLATINUS; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * © Yves Ouvrard, 2009 - 2016
+ * © Yves Ouvrard, 2009 - 2019
  */
 
 #ifndef FLEXION_H
 #define FLEXION_H
 
 #include <QList>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <QString>
 #include <QStringList>
 #include <QUrl>
 
-#include "lemCore.h"
+#include "lemcore.h"
 #include "lemme.h"
 
 #define OMIS 1
@@ -62,7 +62,6 @@ class Flexion : public QObject
 
    public:
     Flexion(QObject *parent = 0);
-//    QStringList const static cas;
     QString           static entreParenth(QString e);
     QStringList const static genres;
     QStringList const static nombres;

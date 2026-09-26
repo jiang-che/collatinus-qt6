@@ -3,25 +3,25 @@
  *  This file is part of COLLATINUS.
  *
  *  COLLATINUS is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Lesser GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  COLLATINVS is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  Lesser GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the Lesser GNU General Public License
  *  along with COLLATINUS; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * © Yves Ouvrard, 2009 - 2016
+ * © Yves Ouvrard, 2009 - 2019
  */
 
 #include "dicos.h"
-
-#include <QDebug>
+#include "paths.h"
+#include <QStringConverter>
 
 /****************
  * Dictionnaire *
@@ -36,13 +36,28 @@
  */
 Dictionnaire::Dictionnaire(QString cfg, QObject *parent) : QObject(parent)
 {
-    QFileInfo fi(cfg);
-    repertoire = qApp->applicationDirPath() + "/data/dicos/";
+    // cfg may be a bare file name: resolve it through the dictionary search
+    // path (user directory first, then system data).
+    QString cfgPath = cfg;
+    if (!QFileInfo(cfg).isAbsolute())
+    {
+        const QStringList dirs = Paths::instance().dictionaryDirs();
+        for (const QString &dir : dirs)
+        {
+            if (QFileInfo::exists(dir + cfg))
+            {
+                cfgPath = dir + cfg;
+                break;
+            }
+        }
+    }
+    QFileInfo fi(cfgPath);
+    repertoire = fi.absolutePath();
+    if (!repertoire.endsWith('/')) repertoire.append('/');
     // éviter de redéfinir partout le répertoire de travail.
     n = fi.baseName();
     // lire le fichier de ressource cfg
-    QSettings settings(repertoire + cfg, QSettings::IniFormat);
-    settings.setIniCodec("utf-8");
+    QSettings settings(cfgPath, QSettings::IniFormat);
     settings.beginGroup("droits");
     auteur = settings.value("auteur").toString();
     url = settings.value("url").toString();
@@ -59,9 +74,6 @@ Dictionnaire::Dictionnaire(QString cfg, QObject *parent) : QObject(parent)
     ji = settings.value("ji").toInt();
     JI = settings.value("JI").toInt();
     alphabet = settings.value("alphabet").toString();
-//    qDebug() << alphabet.size();
-//    if (langue == "cs")
-//        alphabet = "a,b,c,č,d,ď,e,f,g,h,ch,i,j,k,l,m,n,o,p,q,r,ř,s,š,t,ť,u,v,w,x,y,z";
     if (!alphabet.isEmpty())
     {
         QStringList car = alphabet.split(".");
@@ -102,7 +114,6 @@ Dictionnaire::Dictionnaire(QString cfg, QObject *parent) : QObject(parent)
                 indices.prepend(i);
             }
         }
-//        qDebug() << caracteres << indices << nbCar;
     }
     settings.endGroup();
     settings.beginGroup("style");
@@ -122,18 +133,15 @@ Dictionnaire::Dictionnaire(QString cfg, QObject *parent) : QObject(parent)
  */
 int Dictionnaire::compChaines(QString s1, QString s2)
 {
-//    qDebug() << s1 << s2;
     if (s1 == s2) return 0;
     if (s1.isEmpty()) return 1;
     if (s2.isEmpty()) return -1;
     int i1 = 0;
     while ((i1 < nbCar) && !s1.startsWith(caracteres[i1])) i1++;
-//    qDebug() << i1 << nbCar;
     if (i1 == nbCar)
     {
         // Je dois nettoyer la voyelle accentuée.
         QString pr1 = s1.left(1).normalized(QString::NormalizationForm_D).left(1);
-//        qDebug() << s1 << pr1;
         // Décomposition canonique et la voyelle est en tête.
         i1 = 0;
         while ((i1 < nbCar) && (pr1 != caracteres[i1])) i1++;
@@ -202,7 +210,11 @@ QString Dictionnaire::entree_pos(qint64 pos, qint64 taille)
  * \brief * Efface l'index du dictionnaire djvu.
  *          Cf. lis_index_djvu ()
  */
-void Dictionnaire::vide_index() { idxDjvu.clear(); }
+void Dictionnaire::vide_index()
+{
+    idxDjvu.clear();
+}
+
 /**
  * \fn Dictionnaire::vide_ligneLiens
  *
@@ -211,7 +223,10 @@ void Dictionnaire::vide_index() { idxDjvu.clear(); }
  *
  * Jamais utilisée.
  */
-void Dictionnaire::vide_ligneLiens() { ligneLiens.clear(); }
+void Dictionnaire::vide_ligneLiens()
+{
+    ligneLiens.clear();
+}
 /**
  * \fn Dictionnaire::lis_index_djvu
  *
@@ -225,7 +240,7 @@ bool Dictionnaire::lis_index_djvu()
     QFile f(idxJv);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
     QTextStream ts(&f);
-    ts.setCodec("UTF-8"); // Pour windôze !
+    ts.setEncoding(QStringConverter::Utf8); // Pour windôze !
     while (!ts.atEnd())
     {
         idxDjvu << ts.readLine().trimmed().toLower();
@@ -273,12 +288,12 @@ QString Dictionnaire::pageDjvu(int p)
 #else
     if (!QFile::exists(ddjvu))
     {
-        QTextStream(&pg) << "<html><h2>Il faut installer DjView.app\n"
-                            "dans le dossier Applications.<br>\n"
-                            "<a "
-                            "href=\"http://sourceforge.net/projects/djvu/files/"
-                            "DjVuLibre_MacOS/\">\n"
-                            "DjVuLibre_MacOS</a></h2></html>";
+        QTextStream(&pg) << tr("<html><h2>Il faut installer DjView.app\n"
+                               "dans le dossier Applications.<br>\n"
+                               "<a "
+                               "href=\"http://sourceforge.net/projects/djvu/files/"
+                               "DjVuLibre_MacOS/\">\n"
+                               "DjVuLibre_MacOS</a></h2></html>");
     }
     {
         proc->start(ddjvu, args);
@@ -286,10 +301,10 @@ QString Dictionnaire::pageDjvu(int p)
 #endif
     proc->waitForFinished(-1);
     if ((proc->error() == QProcess::ReadError) || (proc->exitCode()))
-        QTextStream(&pg) << "<html><strong>Fichier djvu ou " << sortie_ddjvu
-                         << " introuvable</strong><br>\n"
-                            "Sous Linux, installer le paquet djview<br>\n"
-                            "Collatinux X.1 - Licence GNU-GPL</html>";
+        QTextStream(&pg) << tr("<html><strong>Fichier djvu ou %1 introuvable</strong>"
+                               "<br>\nSous Linux, installer le paquet djview<br>\n"
+                               "Collatinux X.1 - Licence GNU-GPL</html>")
+                                .arg(sortie_ddjvu);
     else
     {
         QTextStream(&pg) << "<html>" << auteur << "<a href=\"" << url << "\">"
@@ -496,7 +511,6 @@ QString Dictionnaire::pageXml(QStringList lReq)
     }
     pg.prepend(auteur + " <a href=\"http://" + url + "\">" + url + "</a> ");
 
-    //qDebug() << ici << avant << apres;
     for (int j = 0; j < ici.size(); j++)
     {
         for (int i = avant.size() - 1; i > -1; i--)
@@ -507,7 +521,6 @@ QString Dictionnaire::pageXml(QStringList lReq)
                 apres.removeAt(i);
         // J'élimine les mots qui ne sont pas avant ou après les mots affichés.
     }
-    //qDebug() << avant << apres;
     if (avant.size() > 0) prec = avant[0];
     else if (ici.size() > 0) prec = ici[0];
     else prec = "error";
@@ -519,7 +532,6 @@ QString Dictionnaire::pageXml(QStringList lReq)
     else suiv = "error"; // Je n'ai ni ici, ni après : improbable.
     if (apres.size() > 1) for (int i=1; i<apres.size();i++)
         if (QString::compare(suiv, apres[i], Qt::CaseInsensitive) > 0) suiv = apres[i];
-    //qDebug() << prec << suiv;
 
     return pg;
 }
@@ -545,35 +557,60 @@ QString Dictionnaire::page(QStringList req, int no)
  * \brief Renvoie vrai si le dictionnaire actif est au
  *        format xml, faux dans le cas contraire.
  */
-bool Dictionnaire::estXml() { return xml; }
+bool Dictionnaire::estXml()
+{
+    return xml;
+}
+
 /**
  * \fn QString Dictionnaire::pgPrec ()
  * \brief Fonction de navigation, page précédente.
  */
-QString Dictionnaire::pgPrec() { return prec; }
+QString Dictionnaire::pgPrec()
+{
+    return prec;
+}
+
 /**
  * \fn QString Dictionnaire::pgSuiv ()
  * \brief Fonction de navigation, page suivante.
  */
-QString Dictionnaire::pgSuiv() { return suiv; }
+
+QString Dictionnaire::pgSuiv()
+{
+    return suiv;
+}
+
 /**
  * \fn int Dictionnaire::noPageDjvu ()
  * \brief Renvoie le numéro de la dernière page de
  *        dictionnaire djvu consultée.
  */
-int Dictionnaire::noPageDjvu() { return pdj; }
+int Dictionnaire::noPageDjvu()
+{
+    return pdj;
+}
+
 /**
  * \fn QString Dictionnaire::indexJv ()
  * \brief Renvoie le nom du fichier du dictionnaire
  *        djvu courant.
  */
-QString Dictionnaire::indexJv() { return idxJv; }
+QString Dictionnaire::indexJv()
+{
+    return idxJv;
+}
+
 /**
  * \fn QStringList Dictionnaire::liens ()
  * \brief Renvoie le code html des liens de la page de
  *        dictionnaire affichée.
  */
-QStringList Dictionnaire::liens() { return _liens; }
+QStringList Dictionnaire::liens()
+{
+    return _liens;
+}
+
 /****************
 *    ListeDic   *
 *****************/
@@ -585,7 +622,7 @@ QStringList Dictionnaire::liens() { return _liens; }
  */
 Dictionnaire *ListeDic::dictionnaire_par_nom(QString nom)
 {
-    QMap<QString, Dictionnaire *>::iterator retour = liste.find(nom);
+    QMultiMap<QString, Dictionnaire *>::iterator retour = liste.find(nom);
     if (retour == liste.end()) return NULL;
     return retour.value();
 }
@@ -595,7 +632,11 @@ Dictionnaire *ListeDic::dictionnaire_par_nom(QString nom)
  * \brief Ajoute le dictionnaire d à la liste des
  *        dictionnaires.
  */
-void ListeDic::ajoute(Dictionnaire *d) { liste.insert(d->nom(), d); }
+void ListeDic::ajoute(Dictionnaire *d)
+{
+    liste.insert(d->nom(), d);
+}
+
 /**
  * \fn void ListeDic::change_courant (QString nom)
  * \brief Déclare le dictionnaire de nom nom comme
@@ -611,7 +652,11 @@ void ListeDic::change_courant(QString nom)
  * \brief Renvoie l'ojet dictionnaire courant.
  *
  */
-Dictionnaire *ListeDic::courant() { return currens; }
+Dictionnaire *ListeDic::courant()
+{
+    return currens;
+}
+
 /**
  * \fn void ListeDic::change_courant2 (QString nom)
  * \brief Comme change_courant, mais pour le
@@ -627,7 +672,11 @@ void ListeDic::change_courant2(QString nom)
  * \brief Comme courant(), mais pour le dictionnaire
  *        supplémentaire
  */
-Dictionnaire *ListeDic::courant2() { return currens2; }
+Dictionnaire *ListeDic::courant2()
+{
+    return currens2;
+}
+
 /**
  * \fn QString Dictionnaire::ramise (QString f)
  * \brief Essaie de convertir la chaîne f pour qu'elle
@@ -638,9 +687,9 @@ Dictionnaire *ListeDic::courant2() { return currens2; }
 QString Dictionnaire::ramise(QString f)
 {
     if (!ji)
-        f = f.replace(QRegExp("(^|[aeo]+|^in|^ad|^per)i([aeiou])"), "\\1j\\2");
-    f = f.replace(QRegExp("(^|[aeio]+|^in|^ad|^per)u([aeiou])"), "\\1v\\2");
-    f = f.replace(QRegExp("(^|[\\w]+r)u([aeiou])"), "\\1v\\2");
+        f = f.replace(QRegularExpression("(^|[aeo]+|^in|^ad|^per)i([aeiou])"), "\\1j\\2");
+    f = f.replace(QRegularExpression("(^|[aeio]+|^in|^ad|^per)u([aeiou])"), "\\1v\\2");
+    f = f.replace(QRegularExpression("(^|[\\w]+r)u([aeiou])"), "\\1v\\2");
     return f;
 }
 
@@ -667,7 +716,7 @@ bool andromeda (QString nf)
     QString linea;
     QString cle;
     QTextStream fli (&findex);
-    fli.setCodec ("UTF-8");
+    fli.setEncoding(QStringConverter::Utf8);
     qint64 p;
     fandr.seek (0);
     while (!fandr.atEnd ())
@@ -677,7 +726,7 @@ bool andromeda (QString nf)
        linea = fandr.readLine ();
        // int pos = exp.indexIn (linea);
        // ducange :
-       //QRegExp expr ("(<H1>)([^<]+)(</H1>)");
+       //QRegularExpression expr ("(<H1>)([^<]+)(</H1>)");
        //int pos = expr.indexIn (linea);
        //if (pos > -1)
        //{
@@ -686,11 +735,11 @@ bool andromeda (QString nf)
        //}
 
        // pour lewis
-       QRegExp exp ("(^.*key=\")([^\"]+)(\".*$)");
-       int pos = exp.indexIn (linea);
-       if (pos > -1)
+       QRegularExpression exp("(^.*key=\")([^\"]+)(\".*$)");
+       const QRegularExpressionMatch m = exp.match(linea);
+       if (m.hasMatch())
        {
-           cle = exp.cap (2);
+           cle = m.captured(2);
            fli << cle << ":" << p  << "\n";
        }
     }

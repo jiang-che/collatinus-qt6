@@ -1,0 +1,20 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Collatinus-Qt6
+Name[fr]=Collatinus-Qt6
+Name[zh_CN]=Collatinus-Qt6 拉丁语分析工具
+GenericName=Latin lemmatiser
+GenericName[fr]=Lemmatiseur latin
+GenericName[zh_CN]=拉丁语词形还原工具
+Comment=Latin morphology and lexical analysis
+Comment[fr]=Analyse morphologique et lexicale du latin
+Comment[zh_CN]=拉丁语形态与词汇分析工具
+Exec=collatinus
+Icon=collatinus
+Terminal=false
+Categories=Education;Languages;
+Keywords=Latin;morphology;lemmatisation;dictionary;lexicon;scansion;
+Keywords[fr]=latin;morphologie;lemmatisation;dictionnaire;lexique;scansion;
+Keywords[zh_CN]=拉丁语;形态;词形还原;词典;词表;韵律;
+StartupNotify=true

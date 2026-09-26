@@ -2,16 +2,16 @@
 !
 !This file is part of COLLATINUS.
 !COLLATINUS is free software; you can redistribute it and/or modify
-!it under the terms of the GNU General Public License as published by
+!it under the terms of the Lesser GNU General Public License as published by
 !the Free Software Foundation; either version 2 of the License, or
 !(at your option) any later version.
 !
 !COLLATINUS is distributed in the hope that it will be useful,
 !but WITHOUT ANY WARRANTY; without even the implied warranty of
 !MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!GNU General Public License for more details.
+!Lesser GNU General Public License for more details.
 !
-!You should have received a copy of the GNU General Public License
+!You should have received a copy of the Lesser GNU General Public License
 !along with COLLATINUS; if not, write to the Free Software
 !Foundation, Inc., 59 Temple Place, Suite 3inv, Boston, MA  02111-1307  USA
 ! (c) © Yves Ouvrard, 2011 - 2016
@@ -47,6 +47,7 @@
 !    n1 : numéro du radical
 !    n2 : nombre de caractères à ôter de la forme canonique
 !    ch : chaîne à ajouter à la chaîne obtenue pour avoir le radical
+!         une chaîne vide s'écrit '0'
 !
 ! Deuxième possibilité :
 ! Le radical est identique à la forme canonique
@@ -60,6 +61,8 @@
 !
 ! des:<intervalle>:<numMorph>:<listeDes>
 !  <num> est le n° de radical
+!  <listeDes> est la liste des désinences correspondant à chaque n° de
+!             morpho de l'intervalle. '-' représente une désinence vide.
 !
 ! Si une désinence de même morpho s'ajoute à celle du modèle parent au lieu
 ! de l'écraser, on écrit
@@ -74,6 +77,16 @@
 ! Utilisation : ce qui précède une constante est répété devant chaque ';' de
 !   la constante
 !
+! SUFFIXES
+! suf:<intervalle>:<suffixe>
+! <intervalle> : liste des n° de morphologie des formes qui sont parfois
+!               suivies du suffixe <suffixe>
+!
+! sufd:<suffixe> : toutes les formes sont toujours suivies du suffixe <suffixe>
+!
+!
+!
+!
 $compar=ŏr;ŏr;ōrĕm;ōrĭs;ōrī;ōrĕ;ōrēs;ōrēs;ōrēs;ōrŭm;ōrĭbŭs;ōrĭbŭs
 $em=ĕm;ēs;ĕt;ēmŭs;ētĭs;ēnt
 $ens=ēns;ēns;ēntĕm;ēntĭs;ēntī;ēntĕ;ēntēs;ēntēs;ēntēs;ēntĭŭm,ēntŭm;ēntĭbŭs;ēntĭbŭs
@@ -83,6 +96,7 @@ $templum=ŭm;ŭm;ŭm;ī;ō;ō;ă;ă;ă;ōrŭm;īs;īs
 $se=sē,sēsē;sŭī;sĭbī;sē,sēsē
 $tu=ū;ē;ŭī;ĭbĭ;ē
 $uita=ă;ă;ăm;āe;āe;ā;āe;āe;ās;ārŭm;īs;īs
+$vbem=ĕm;ēs;ĕt;ēmŭs;ētĭs;ēnt
 
 modele:inv
 R:0:0,0
@@ -165,10 +179,9 @@ pere:lupus
 des+:1,3:1:ŏs;ŏn
 
 modele:templum
-pere:lupus
 R:1:2,0
-des:1-3:1:ŭm;ŭm;ŭm
-des:7-9:1:ă;ă;ă
+des:1-12:1:$templum
+pos:n
 
 modele:arpinum
 pere:templum
@@ -271,7 +284,8 @@ des+:10:1:ŭm
 
 modele:mare
 pere:ciuis
-des:1-3:1:ĕ
+!des:1-3:1:ĕ
+des:1-3:2:-;-;-
 des:6-9:1:ī;ĭă;ĭă;ĭă
 
 modele:moenia
@@ -453,6 +467,11 @@ des:27-36:1:ĕm;ĭs;ī;ī;ēs;ēs;ēs,īs;ĭŭm;ĭbŭs
 des:37-48:1:ĕ;ĕ;ĕ;ĭs;ī;ī;ĭă;ĭă;ĭă;ĭŭm;ĭbŭs
 des:49-84:1:ĭ$compar;ĭ$compar;ĭŭs;ĭŭs;ĭŭs;ĭōrĭs;ĭōrī;ĭōrĕ;ĭōră;ĭōră;ĭōră;ĭōrŭm;ĭōrĭbŭs
 des:85-120:1:īssĭm$lupus;īssĭm$uita;īssĭm$templum
+pos:a
+
+modele:felix
+pere:fortis
+des:37-39:4:-;-;-
 
 modele:facilis
 pere:fortis
@@ -461,9 +480,10 @@ des:85-120:6:$lupus;$uita;$templum
 
 modele:infans
 pere:fortis
+R:2:1,t
 des:37-39:1:ns
 des+:18,30,42:1:ē
-des+:22,34,46:1:ŭm3
+des+:22,34,46:1:ŭm
 
 modele:acer
 pere:fortis
@@ -484,13 +504,13 @@ des:22,34,46:1:ŭm;ŭm;ŭm
 ! plus: pas de degrés de signification
 modele:plus
 pere:fortis
+des:43-45:0:ă
 abs:49-120
 
 modele:uetus
 pere:diues
 R:3:2,ērrĭm
 des:85-120:3:$lupus;$uita;$templum
-!des:85-120:1:rĭmŭs;rĭmĕ;rĭmŭm;rĭmī;rĭmō;rĭmō;rĭmī;rĭmī;rĭmōs;rĭmōrŭm;rĭmīs;rĭmīs;rĭmă;rĭmă;rĭmăm;rĭmāe;rĭmāe;rĭmā;rĭmāe;rĭmāe;rĭmās;rĭmārŭm;rĭmīs;rĭmīs;rĭmŭm;rĭmŭm;rĭmŭm;rĭmī;rĭmō;rĭmō;rĭmă;rĭmă;rĭmă;rĭmōrŭm;rĭmīs
 
 ! provisoire
 ! modele:pronom
@@ -532,6 +552,7 @@ pere:unus
 R:0:1,0
 des:13,37,39:0:ĕ;ŭm
 abs:14,20,26,32,38,44
+pos:p
 
 modele:ille
 pere:ipse
@@ -577,6 +598,7 @@ modele:quilibet
 pere:qui
 R:1:8,0
 sufd:lĭbĕt
+sufd:lŭbĕt
 
 modele:quinam
 pere:qui
@@ -594,7 +616,6 @@ pere:qui
 R:1:4,0
 des:13:1:quĭs
 des:37-39:1:quĭd
-des+:25,43,45:1:quă
 
 modele:siquis
 pere:quis
@@ -628,19 +649,6 @@ abs:14-17,19-36,38,40,41,42-48
 des:13,18:1:īsquĭs,īcquĭs;ōquō
 des:37,39,42:1:īdquĭd,īcquĭd;īdquĭd,īcquĭd;ōquō
 pos:p
-
-modele:qualiscumque
-pere:plus
-R:1:8,0
-R:4:6,0
-sufd:cūnquĕ
-sufd:cūmquĕ
-
-modele:quantuscumque
-pere:nonus
-R:0:8,0
-sufd:cūnquĕ
-sufd:cūmquĕ
 
 modele:ego
 R:0:K
@@ -706,7 +714,7 @@ pos:p
 
 modele:plerique
 pere:doctus
-R:0:4
+R:0:4,0
 abs:13-18,25-30,37-42,49-120
 sufd:quĕ
 pos:p
@@ -723,9 +731,11 @@ des:145-150:1:ĕrăm;ĕrās;ĕrăt;ĕrāmŭs;ĕrātĭs;ĕrānt
 des:151-156:1:ĕrō̆;ĕrī̆s;ĕrĭt;ĕrī̆mŭs;ĕrī̆tĭs;ĕrīnt
 ! subjonctif
 des:157-162:0:$em
-des:163-168:0:ārĕm;ārēs;ārĕt;ārēmŭs;ārētĭs;ārēnt
+!des:163-168:0:ārĕm;ārēs;ārĕt;ārēmŭs;ārētĭs;ārēnt
+des:163-168:0:ār$vbem
 des:169-174:1:ĕrĭm;ĕrī̆s;ĕrĭt;ĕrī̆mŭs;ĕrī̆tĭs;ĕrīnt
-des:175-180:1:īssĕm;īssēs;īssĕt;īssēmŭs;īssētĭs;īssēnt
+!des:175-180:1:īssĕm;īssēs;īssĕt;īssēmŭs;īssētĭs;īssēnt
+des:175-180:1:īss$vbem
 ! impératif
 des:181-186:0:ā;ātĕ;ātō;ātō;ātōtĕ;āntō
 ! infinitif
@@ -790,10 +800,11 @@ des:302:0:ărī
 modele:moneo
 pere:amo
 R:0:2,0
-R:2:-
+R:1:-
 des:121-126:0:ĕō̆;ēs;ĕt;ēmŭs;ētĭs;ēnt
 des:127-132:0:ēbăm;ēbās;ēbăt;ēbāmŭs;ēbātĭs;ēbānt
 des:133-138:0:ēbō̆;ēbĭs;ēbĭt;ēbĭmŭs;ēbĭtĭs;ēbūnt
+! indicatif perfectum hérité
 ! subjonctif
 des:157-162:0:ĕăm;ĕās;ĕăt;ĕāmŭs;ĕātĭs;ĕānt
 des:163-168:0:ērĕm;ērēs;ērĕt;ērēmŭs;ērētĭs;ērēnt
@@ -806,7 +817,7 @@ des:188:1:īssĕ
 des:189-200:0:$ens
 des:201-212:0:$ens
 des:213-224:0:ēns;ēns;ēns;ēntĭs;ēntī;ēntĕ;ēntĭă;ēntĭă;ēntĭă;ēntĭŭm,ēntŭm;ēntĭbŭs;ēntĭbŭs
-! gérondif, supin hérité de amo
+! gérondif, supin hérités de amo
 des:261-264:0:ēndŭm;ēndī;ēndō;ēndō
 ! indicatif passif
 des:267-272:0:ĕŏr;ērĭs,ērĕ;ētŭr;ēmŭr;ēmĭnī;ēntŭr
@@ -823,10 +834,11 @@ des:302:0:ērī
 des:339-350:0:ēndŭs;ēndĕ;ēndŭm;ēndī;ēndō;ēndō;ēndī;ēndī;ēndōs;ēndōrŭm;ēndīs;ēndīs
 des:351-362:0:ēndă;ēndă;ēndăm;ēndāe;ēndāe;ēndā;ēndāe;ēndāe;ēndās;ēndārŭm;ēndīs;ēndīs
 des:363-374:0:ēndŭm;ēndŭm;ēndŭm;ēndī;ēndō;ēndō;ēndă;ēndă;ēndă;ēndōrŭm;ēndīs;ēndīs
+pos:v
 
 modele:licet
 pere:moneo
-abs:121,122,124-128,130-134,136-140,142-146,148-152,154-158,160-164,166-170,172-176,178-183,185-326,328,330-410
+abs:121,122,124-128,130-134,136-140,142-146,148-152,154-158,160-164,166-170,172-176,178-183,185,186,188-326,328,330-410
 
 modele:lego
 pere:moneo
@@ -840,7 +852,8 @@ des:163-168:0:ĕrĕm;ĕrēs;ĕrĕt;ĕrēmŭs;ĕrētĭs;ĕrēnt
 des:181-186:0:ĕ;ĭtĕ;ĭtō;ĭtō;ĭtōtĕ;ūntō
 ! infinitif
 des:187:0:ĕrĕ
-! participe présent hérité
+! 188 infinitif parfait hérité
+! 189-224 participe présent hérité
 ! gérondif et supin hérités
 ! indicatif passif
 des:267-272:0:ŏr;ĕrĭs,ĕrĕ;ĭtŭr;ĭmŭr;ĭmĭnī;ūntŭr
@@ -852,7 +865,10 @@ des:291-296:0:ĕrĕr;ĕrērĭs,ĕrērĕ;ĕrētŭr;ĕrēmŭr;ĕrēmĭnī;ĕrēnt�
 des:297,298:0:ĕrĕ;ĭmĭnī
 des:299-301:0:ĭtŏr;ĭtŏr;ūntŏr
 des:302:0:ī
-! adjectif verbal hérité
+! adjectif verbal
+des+:339-350:0:ūnd$lupus
+des+:351-362:0:ūnd$uita
+des+:363-374:0:ūnd$templum
 
 modele:fero
 pere:lego
@@ -862,7 +878,7 @@ R:5:3,ēr
 des:122,123,125:5:s;t;tĭs
 ! impératif
 des:181:4:-
-des:182:5:tĕ
+des:182-185:5:tĕ;tō;tōtĕ
 ! infinitif
 des:187:3:ĕ
 des:302:3:ī
@@ -917,8 +933,9 @@ abs:181-186,189-374
 modele:edo
 pere:lego
 R:3:3,0
-des+:122,123:3:ēs;ēst
+des+:122,123,124:3:ēs;ēst;ēstĭs
 des+:163-168:3:ēss$em
+des:187:3:ēssĕ
 
 modele:capio
 pere:lego
@@ -963,11 +980,12 @@ des:268-271:3:īrĭs,īrĕ;ītŭr;īmŭr;īmĭnī
 des:291-296:3:īrĕr;ĭrērĭs,ĭrērĕ;īrētŭr;īrēmŭr;īrēmĭnī;īrēntŭr
 ! impératif et infinitif
 des:297,298:3:īrĕ;īmĭnī
-des:299,300:3:ītŏr;ītŏr;ĭūntŏr
+des:299-301:3:ītŏr;ītŏr;ĭūntŏr
 des:302:3:īrī
 
 modele:scio
 pere:audio
+des+:127-132:3:ībăm;ībās;ībăt;ībāmŭs;ībātĭs;ībānt
 des+:133-138:3:ībō̆;ībĭs;ībĭt;ībĭmŭs;ībĭtĭs;ībūnt
 
 modele:fio
@@ -1003,7 +1021,7 @@ des:181-185:2:ĕs;ēstĕ;ēstō;ēstō;ēstōtĕ
 des:186:0:ūntō
 ! infinitif
 des:187:7:ĕ
-des:416:4:fŏrĕ
+des:415:4:fŏrĕ
 ! participe futur
 des:225-260:1:tūr$lupus;tūr$uita;tūr$templum
 !des:225-236:8:ūrŭs;ūrĕ;ūrŭm;ūrī;ūrō;ūrō;ūrī;ūrī;ūrōs;ūrōrŭm;ūrīs;ūrīs
@@ -1039,7 +1057,7 @@ des:121-126:0:ŏr;ārĭs;ātŭr;āmŭr;āmĭnī;āntŭr
 des:127-132:0:ābăr;ābārĭs,ābārĕ;ābātŭr;ābāmŭr;ābāmĭnī;ābāntŭr
 des:133-138:0:ābŏr;ābĕrĭs,ābĕrĕ;ābĭtŭr;ābĭmŭr;ābĭmĭnī;ābūntŭr
 ! subjonctif
-des:157-162:0:ĕr;ērĭs;ētŭr;ēmŭr;ēmĭnī;ēntŭr
+des:157-162:0:ĕr;ērĭs,ērĕ;ētŭr;ēmŭr;ēmĭnī;ēntŭr
 des:163-168:0:ārĕr;ārērĭs;ārētŭr;ārēmŭr;ārēmĭnī;ārēntŭr
 ! impératif
 des:181-186:0:ārĕ;āmĭnī
@@ -1061,6 +1079,10 @@ des:265,266:2:ŭm;ū
 des:375-386:2:ŭs;ĕ;ŭm;ī;ō;ō;ī;ī;ōs;ōrŭm;īs;īs
 des:387-398:2:ă;ă;ăm;āe;āe;ā;āe;āe;ās;ārŭm;īs;īs
 des:399-410:2:ŭm;ŭm;ŭm;ī;ō;ō;ă;ă;ă;ōrŭm;īs;īs
+! adj. verbal
+des+:339-350:0:ānd$lupus
+des+:351-362:0:ānd$uita
+des+:363-374:0:ānd$templum
 pos:v
 
 modele:uereor
@@ -1083,6 +1105,10 @@ des:201-212:0:$ens
 des:213-224:0:ēns;ēns;ēns;ēntĭs;ēntī;ēntĕ;ēntĭă;ēntĭă;ēntĭă;ēntĭŭm,ēntŭm;ēntĭbŭs;ēntĭbŭs
 ! gérondif et supin
 des:261-264:0:ēndŭm;ēndī;ēndō;ēndō
+! adj.verbal
+des+:339-350:0:ēnd$lupus
+des+:351-362:0:ēnd$uita
+des+:363-374:0:ēnd$templum
 
 modele:sequor
 pere:uereor

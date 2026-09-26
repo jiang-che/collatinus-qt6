@@ -3,20 +3,20 @@
  *  This file is part of COLLATINUS.
  *
  *  COLLATINUS is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Lesser GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  COLLATINVS is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  Lesser GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the Lesser GNU General Public License
  *  along with COLLATINUS; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * © Yves Ouvrard, 2009 - 2016
+ * © Yves Ouvrard, 2009 - 2019
  */
 
 #ifndef MODELE_H
@@ -31,7 +31,7 @@
 #include <QDebug>
 
 #include "ch.h"
-#include "lemCore.h"
+#include "lemcore.h"
 
 class LemCore;
 class Modele;
@@ -64,14 +64,14 @@ class Modele : public QObject
    private:
     QList<int> _absents;
     QStringList static const cles;
-    QMultiMap<int, Desinence *> _desinences;
+    QMultiMap<QPair<QString, int>, Desinence *> _desinences;
     QMap<int, QString> _genRadicaux;
     QString _gr;
-    QString _grq;
-    LemCore *_lemmatiseur;
+    LemCore *_lemcore;
     Modele *_pere;
     QChar   _pos;
     QString _suf;
+	void    insereDes(Desinence* d);
 
    public:
     Modele(QStringList ll, LemCore *parent = 0);
@@ -80,15 +80,17 @@ class Modele : public QObject
     QList<int>         clesR();
     Desinence         *clone(Desinence *d);
     bool               deja(int m);
-    QList<Desinence *> desinences(int d);
-    QList<Desinence *> desinences();
+    QList<Desinence*>  desinences();
+    QList<Desinence*>  desinences(int d);
+	QList<Desinence*>  desinences(QString g, int n);
     bool               estUn(QString m);
     QString            genRadical(int r);
     QString            gr();
-    QString            grq();
+    void               interprete(QStringList ll);
     static QList<int>  listeI(QString l);
     QList<int>         morphos();
     QChar              pos();
+    QString            vg(QString c);
 };
 
 #endif

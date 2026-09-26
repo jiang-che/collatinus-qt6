@@ -3,23 +3,25 @@
  *  This file is part of COLLATINUS.
  *
  *  COLLATINUS is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Lesser GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  COLLATINVS is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  Lesser GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the Lesser GNU General Public License
  *  along with COLLATINUS; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * © Yves Ouvrard, 2009 - 2016
+ * © Yves Ouvrard, Philippe Verkerk, 2009 - 2019
  */
 
 #include "lemmatiseur.h"
+#include "paths.h"
+#include <QStringConverter>
 
 Lemmatiseur::Lemmatiseur(QObject *parent, LemCore *l, QString cible, QString resDir) : QObject(parent)
 {
@@ -32,7 +34,7 @@ Lemmatiseur::Lemmatiseur(QObject *parent, LemCore *l, QString cible, QString res
     }
     else _lemCore = l;
     if (resDir == "")
-        _resDir = qApp->applicationDirPath() + "/data/";
+        _resDir = Paths::instance().coreDataDir();
     else if (resDir.endsWith("/")) _resDir = resDir;
     else _resDir = resDir + "/";
 
@@ -54,11 +56,40 @@ Lemmatiseur::Lemmatiseur(QObject *parent, LemCore *l, QString cible, QString res
 QStringList Lemmatiseur::lemmatiseF(QString f, bool deb)
 {
     QStringList res;
-    MapLem ml = _lemCore->lemmatiseM(f, deb);
+    //MapLem ml = _lemCore->lemmatiseM(f, deb);
+    MapLem ml = lemmatiseM(f, deb);
     foreach (Lemme *l, ml.keys())
         res.append(l->humain(_html,_cible));
-    // if (res.empty()) res.append(f);
     return res;
+}
+
+void Lemmatiseur::changeCore(LemCore *l)
+{
+	_lemCore = l;
+}
+
+MapLem Lemmatiseur::lemmatiseM(QString f, bool deb)
+{
+    MapLem ml = _lemCore->lemmatiseM(f, deb);
+    // appliquer les règles aval
+    QStringList lfti = _lemCore->ti(f);
+    for (int i=0;i<lfti.count();++i)
+    {
+        QString fti = lfti.at(i);
+        MapLem nml = _lemCore->lemmatiseM(fti,true,0,false);
+        for(int j=0;j<nml.count();++j)
+        {
+            Lemme* nl = nml.keys().at(j);
+            ml.insert(nl, nml.value(nl));
+        }
+    }
+    /*
+    // dernier essai, sans les vargraph, pour les variantes
+    // à cheval sur assim/radical/désinence/suffixe
+    if (ml.isEmpty())
+        ml = _lemCore->lemmatiseM(f, true, 0, false);
+    */
+    return ml;
 }
 
 /**
@@ -80,9 +111,9 @@ QStringList Lemmatiseur::frequences(QString txt)
         forme = formes.at(i);
         if (forme.isEmpty() || forme.toInt()) continue;
         // supprimer les ponctuations
-        int pos = Ch::reAlphas.indexIn(forme);
-        if (pos < 0) continue;
-        forme = Ch::reAlphas.cap(1);
+        const QRegularExpressionMatch m = Ch::reAlphas.match(forme);
+        if (!m.hasMatch()) continue;
+        forme = m.captured(1);
         if ((i == 0) || formes[i - 1].contains(Ch::rePonct))
             forme.prepend('*');  // = "*" + forme;
         freq[forme]++;  // je suppose que le créateur d'entiers l'initialise à 0
@@ -184,7 +215,7 @@ QStringList Lemmatiseur::frequences(QString txt)
             sortie << format.arg (numero).arg(nUnic).arg(nAmb).arg (lemme).arg(n);
         }
     }
-    qSort(sortie.begin(), sortie.end(), Ch::inv_sort_i);
+    std::sort(sortie.begin(), sortie.end(), Ch::inv_sort_i);
     // déformatage des nombres
     int cs = sortie.count();
     for (int i = 0; i < cs; ++i)
@@ -196,17 +227,19 @@ QStringList Lemmatiseur::frequences(QString txt)
         if (ls.at(0) == ' ') ls.prepend("&lt;1");
         sortie[i] = ls;
     }
-    sortie.insert(0, "légende : n (a, b, c)<br/>\n");
-    sortie.insert(1, "n = a+c<br/>\n");
-    sortie.insert(
-        2, "a = nombre de formes rattachées seulement à ce lemme<br/>\n");
-    sortie.insert(3,
-                  "b = nombre de formes ambigu\u00ebs (partagées par plusieurs "
-                  "lemmes)<br/>\n");
-    sortie.insert(4,
-                  "c = nombre probable de formes ambigu\u00ebs rattachées à ce "
-                  "lemme<br/>\n");
-    sortie.insert(5, "------------<br/>\n");
+    // Qt 6 QList::insert() is out-of-range-unsafe; build the legend with
+    // prepend() (reverse order) instead of fixed indices.
+    sortie.prepend(tr("------------<br/>\n"));
+    sortie.prepend(
+        tr("c = nombre probable de formes ambigu\u00ebs rattachées à ce "
+           "lemme<br/>\n"));
+    sortie.prepend(
+        tr("b = nombre de formes ambigu\u00ebs (partagées par plusieurs "
+           "lemmes)<br/>\n"));
+    sortie.prepend(
+        tr("a = nombre de formes rattachées seulement à ce lemme<br/>\n"));
+    sortie.prepend(tr("n = a+c<br/>\n"));
+    sortie.prepend(tr("légende : n (a, b, c)<br/>\n"));
     return sortie;
 }
 
@@ -245,24 +278,21 @@ QString Lemmatiseur::lemmatiseT(QString &t, bool alpha, bool cumVocibus,
                            bool cumMorpho, bool nreconnu)
 {
     // pour mesurer :
-    // QElapsedTimer timer;
-    // timer.start();
-/*
-    alpha = alpha || _alpha;
-    cumVocibus = cumVocibus || _formeT;
-    cumMorpho = cumMorpho || _morpho;
-    nreconnu = nreconnu || _nonRec;
-*/
+    //QElapsedTimer timer;
+    //timer.start();
+
     // Pour coloriser le texte
     bool cumColoribus = !_couleurs.isEmpty();
     bool listeVide = _hLem.isEmpty();
     int colPrec = 0;
     int formesConnues = 0;
     // éliminer les chiffres et les espaces surnuméraires
-    t.remove(QRegExp("\\d"));
-//    t = t.simplified();
+    t.remove(QRegularExpression("\\d"));
+
     // découpage en mots
-    QStringList lm = t.split(QRegExp("\\b"));
+    QStringList lm = t.split(QRegularExpression("\\b"));
+    //QStringList lm = tokenise(t);
+
     // conteneur pour les résultats
     QStringList lsv;
     // conteneur pour les échecs
@@ -270,7 +300,6 @@ QString Lemmatiseur::lemmatiseT(QString &t, bool alpha, bool cumVocibus,
     // lemmatisation pour chaque mot
     if (lm.size() < 2)
     {
-//        qDebug() << t << lm.size() << lm;
         return "";
         // Ça peut arriver que le texte ne contienne qu"une ponctuation
     }
@@ -282,7 +311,8 @@ QString Lemmatiseur::lemmatiseT(QString &t, bool alpha, bool cumVocibus,
         QString sep = lm.at(i - 1);
         bool debPhr = ((i == 1 && lm.count() !=3) || sep.contains(Ch::rePonct));
         // lemmatisation de la forme
-        MapLem map = _lemCore->lemmatiseM(f, !_majPert || debPhr);
+        //MapLem map = _lemCore->lemmatiseM(f, !_majPert || debPhr);
+        MapLem map = lemmatiseM(f, !_majPert || debPhr);
         // échecs
         if (map.empty())
         {
@@ -293,7 +323,7 @@ QString Lemmatiseur::lemmatiseT(QString &t, bool alpha, bool cumVocibus,
                 if (_html)
                     lsv.append("<li style=\"color:blue;\">" + f + "</li>");
                 else
-                    lsv.append("> " + f + " ÉCHEC\n");
+                    lsv.append("> " + f + " " + tr("ÉCHEC") + "\n");
             }
             if (cumColoribus)
             {
@@ -305,7 +335,6 @@ QString Lemmatiseur::lemmatiseT(QString &t, bool alpha, bool cumVocibus,
                     lem.replace("v","u");
                     lem.replace("J","I");
                     lem.replace("V","U");
-                    // qDebug() << lem;
                     if (_hLem.contains(lem))
                     {
                         _hLem[lem]++;
@@ -486,7 +515,7 @@ QString Lemmatiseur::lemmatiseT(QString &t, bool alpha, bool cumVocibus,
     if (alpha)
     {
         lsv.removeDuplicates();
-        qSort(lsv.begin(), lsv.end(), Ch::sort_i);
+        std::sort(lsv.begin(), lsv.end(), Ch::sort_i);
     }
     // peupler lRet avec les résultats
     QStringList lRet = lsv;
@@ -510,13 +539,14 @@ QString Lemmatiseur::lemmatiseT(QString &t, bool alpha, bool cumVocibus,
         nonReconnus.removeDuplicates();
         QString nl;
         if (_html) nl = "<br/>";
-        if (alpha) qSort(nonReconnus.begin(), nonReconnus.end(), Ch::sort_i);
+        if (alpha) std::sort(nonReconnus.begin(), nonReconnus.end(), Ch::sort_i);
         QString titreNR;
         int tot = (lm.count() - 1) / 2;
         QTextStream(&titreNR) << "--- " << nonReconnus.count() << "/"
                               << tot << " ("
                               << ((nonReconnus.count() * 100) / tot)
-                              << " %) FORMES NON RECONNUES ---" << nl << "\n";
+                              << " %) " << tr("FORMES NON RECONNUES") << " ---"
+                              << nl << "\n";
         lRet.append(titreNR + nl);
         foreach (QString nr, nonReconnus)
             lRet.append(nr + nl);
@@ -534,7 +564,7 @@ QString Lemmatiseur::lemmatiseT(QString &t, bool alpha, bool cumVocibus,
         }
     }
     // fin de la mesure :
-    // qDebug()<<"Eneide"<<timer.nsecsElapsed()<<"ns";
+    //qDebug()<<"cic-fam C12"<<timer.elapsed()<<"ms";
     return lRet.join("");
 }
 
@@ -555,7 +585,7 @@ QString Lemmatiseur::lemmatiseFichier(QString f, bool alpha, bool cumVocibus,
     QFile fichier(f);
     fichier.open(QFile::ReadOnly);
     QTextStream flf(&fichier);
-    flf.setCodec("UTF-8"); // Pour windôze !
+    flf.setEncoding(QStringConverter::Utf8); // Pour windôze !
     QString texte = flf.readAll();
     fichier.close();
     return lemmatiseT(texte, alpha, cumVocibus, cumMorpho, nreconnu);
@@ -597,7 +627,8 @@ void Lemmatiseur::verbaCognita(QString fichier,bool vb)
             {
                 if (!ligne.startsWith("!") && !ligne.isEmpty()) // hLem.insert(ligne,1);
                 {
-                    item = _lemCore->lemmatiseM (ligne, false, false);
+                    //item = _lemCore->lemmatiseM (ligne, false, false);
+                    item = lemmatiseM (ligne, false);
                     foreach (Lemme *lem, item.keys())
                         _hLem.insert(lem->cle(),0);
                 }
@@ -613,9 +644,11 @@ void Lemmatiseur::verbaOut(QString fichier)
     QString format = "%1\t%2\n";
     QFile file(fichier);
     if (file.open(QFile::WriteOnly | QFile::Text))
-        foreach (QString lem, _hLem.keys())
     {
+        foreach (QString lem, _hLem.keys())
+        {
             file.write(format.arg(lem).arg(_hLem[lem]).toUtf8());
+        }
     }
 }
 
@@ -625,13 +658,20 @@ void Lemmatiseur::verbaOut(QString fichier)
  *        permet de fournir par défaut des résultats dans
  *        l'ordre alphabétique.
  */
-bool Lemmatiseur::optAlpha() { return _alpha; }
+bool Lemmatiseur::optAlpha()
+{
+    return _alpha;
+}
+
 /**
  * \fn bool Lemmatiseur::optHtml()
  * \brief Accesseur de l'option html, qui
  *        permet de renvoyer les résultats au format html.
  */
-bool Lemmatiseur::optHtml() { return _html; }
+bool Lemmatiseur::optHtml()
+{
+    return _html;
+}
 
 /**
  * \fn bool Lemmatiseur::optFormeT()
@@ -639,7 +679,10 @@ bool Lemmatiseur::optHtml() { return _html; }
  *        qui donne en tête de lemmatisation
  *        la forme qui a été analysée.
  */
-bool Lemmatiseur::optFormeT() { return _formeT; }
+bool Lemmatiseur::optFormeT()
+{
+    return _formeT;
+}
 
 /**
  * \fn bool Lemmatiseur::optMajPert()
@@ -647,7 +690,11 @@ bool Lemmatiseur::optFormeT() { return _formeT; }
  *        qui permet de tenir compte des majuscules
  *        dans la lemmatisation.
  */
-bool Lemmatiseur::optMajPert() { return _majPert; }
+bool Lemmatiseur::optMajPert()
+{
+    return _majPert;
+}
+
 /**
  * \fn bool Lemmatiseur::optMorpho()
  * \brief Accesseur de l'option morpho,
@@ -670,7 +717,11 @@ bool Lemmatiseur::optNonRec()
  */
 // modificateurs d'options
 
-void Lemmatiseur::setAlpha(bool a) { _alpha = a; }
+void Lemmatiseur::setAlpha(bool a)
+{
+    _alpha = a;
+}
+
 /**
  * \fn void Lemmatiseur::setCible(QString c)
  * \brief Permet de changer la langue cible.
@@ -680,27 +731,47 @@ void Lemmatiseur::setCible(QString c)
     _cible = c;
     _lemCore->setCible(c);
 }
+
 /**
  * \fn void Lemmatiseur::setHtml (bool h)
  * \brief Modificateur de l'option html.
  */
-void Lemmatiseur::setHtml(bool h) { _html = h; }
+void Lemmatiseur::setHtml(bool h)
+{
+    _html = h;
+}
+
 /**
  * \fn void Lemmatiseur::setFormeT (bool f)
  * \brief Modificateur de l'option formeT.
  */
-void Lemmatiseur::setFormeT(bool f) { _formeT = f; }
+void Lemmatiseur::setFormeT(bool f)
+{
+    _formeT = f;
+}
+
 /**
  * \fn void Lemmatiseur::setMajPert (bool mp)
  * \brief Modificateur de l'option majpert.
  */
-void Lemmatiseur::setMajPert(bool mp) { _majPert = mp; }
+void Lemmatiseur::setMajPert(bool mp)
+{
+    _majPert = mp;
+}
+
 /**
  * \fn void Lemmatiseur::setMorpho (bool m)
  * \brief Modificateur de l'option morpho.
  */
-void Lemmatiseur::setMorpho(bool m) { _morpho = m; }
-void Lemmatiseur::setNonRec(bool n) { _nonRec = n; }
+void Lemmatiseur::setMorpho(bool m)
+{
+    _morpho = m;
+}
+
+void Lemmatiseur::setNonRec(bool n)
+{
+    _nonRec = n;
+}
 
 /**
  * \fn QString Lemmatiseur::cible()

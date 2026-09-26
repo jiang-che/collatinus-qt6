@@ -3,20 +3,20 @@
  *  This file is part of COLLATINUS.
  *
  *  COLLATINUS is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Lesser GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  COLLATINVS is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  Lesser GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the Lesser GNU General Public License
  *  along with COLLATINUS; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * © Yves Ouvrard, 2009 - 2016
+ * © Yves Ouvrard, 2009 - 2019
  */
 
 /**
@@ -26,9 +26,17 @@
  *
  */
 
-#include "ch.h"
+#include <QApplication>
+#include <QFileInfo>
+#include <QStandardPaths>
 
+#include "ch.h"
+#include "paths.h"
+
+#include <QApplication>
 #include <QDebug>
+#include <QFileInfo>
+#include <QStandardPaths>
 
 /**
  * \fn Ch::ajoute (QString mot, QStringList liste)
@@ -56,18 +64,18 @@ void Ch::allonge(QString *f)
         !QString("\u0101e \u0101u \u0113u \u014de")
              .contains(f->mid(taille - 3, 2).toLower()))
     {
-        f->replace(QRegExp("[a\u0103]([" + consonnes + "])$"), "\u0101\\1");
-        f->replace(QRegExp("[e\u0115]([" + consonnes + "])$"), "\u0113\\1");
-        f->replace(QRegExp("[i\u012d]([" + consonnes + "])$"), "\u012b\\1");
-        f->replace(QRegExp("[o\u014F]([" + consonnes + "])$"), "\u014d\\1");
-        f->replace(QRegExp("[u\u016d]([" + consonnes + "])$"), "\u016b\\1");
-        f->replace(QRegExp("[y\u0233]([" + consonnes + "])$"), "\u045e\\1");
-        f->replace(QRegExp("[A\u0102]([" + consonnes + "])$"), "\u0100\\1");
-        f->replace(QRegExp("[E\u0114]([" + consonnes + "])$"), "\u0112\\1");
-        f->replace(QRegExp("[I\u012c]([" + consonnes + "])$"), "\u012a\\1");
-        f->replace(QRegExp("[O\u014e]([" + consonnes + "])$"), "\u014c\\1");
-        f->replace(QRegExp("[U\u016c]([" + consonnes + "])$"), "\u016a\\1");
-        f->replace(QRegExp("[Y\u0232]([" + consonnes + "])$"), "\u040e\\1");
+        f->replace(QRegularExpression("[a\u0103]([" + consonnes + "])$"), "\u0101\\1");
+        f->replace(QRegularExpression("[e\u0115]([" + consonnes + "])$"), "\u0113\\1");
+        f->replace(QRegularExpression("[i\u012d]([" + consonnes + "])$"), "\u012b\\1");
+        f->replace(QRegularExpression("[o\u014F]([" + consonnes + "])$"), "\u014d\\1");
+        f->replace(QRegularExpression("[u\u016d]([" + consonnes + "])$"), "\u016b\\1");
+        f->replace(QRegularExpression("[y\u0233]([" + consonnes + "])$"), "\u045e\\1");
+        f->replace(QRegularExpression("[A\u0102]([" + consonnes + "])$"), "\u0100\\1");
+        f->replace(QRegularExpression("[E\u0114]([" + consonnes + "])$"), "\u0112\\1");
+        f->replace(QRegularExpression("[I\u012c]([" + consonnes + "])$"), "\u012a\\1");
+        f->replace(QRegularExpression("[O\u014e]([" + consonnes + "])$"), "\u014c\\1");
+        f->replace(QRegularExpression("[U\u016c]([" + consonnes + "])$"), "\u016a\\1");
+        f->replace(QRegularExpression("[Y\u0232]([" + consonnes + "])$"), "\u040e\\1");
     }
 }
 
@@ -80,41 +88,59 @@ void Ch::allonge(QString *f)
 QString Ch::atone(QString a, bool bdc)
 {
     // Supprimer le combining breve à la fin du mot
-    // if (a.endsWith(0x0306)) a.chop(1);
+    // if (a.endsWith(QChar(0x0306))) a.chop(1);
     // minuscules
-    a.replace(0x0101, 'a');
-    a.replace(0x0103, 'a');  // ā ă
-    a.replace(0x0113, 'e');
-    a.replace(0x0115, 'e');  // ē ĕ
-    a.replace(0x012b, 'i');
-    a.replace(0x012d, 'i');  // ī ĭ
-    a.replace(0x014d, 'o');
-    a.replace(0x014f, 'o');  // ō ŏ
-    a.replace(0x016b, 'u');
-    a.replace(0x016d, 'u');  // ū ŭ
-    a.replace(0x0233, 'y');
-    a.replace(0x045e, 'y');  // ȳ ў
+    a.replace(QChar(0x0101), QLatin1Char('a'));
+    a.replace(QChar(0x0103), QLatin1Char('a'));  // ā ă
+    a.replace(QChar(0x0113), QLatin1Char('e'));
+    a.replace(QChar(0x0115), QLatin1Char('e'));  // ē ĕ
+    a.replace(QChar(0x012b), QLatin1Char('i'));
+    a.replace(QChar(0x012d), QLatin1Char('i'));  // ī ĭ
+    a.replace(QChar(0x014d), QLatin1Char('o'));
+    a.replace(QChar(0x014f), QLatin1Char('o'));  // ō ŏ
+    a.replace(QChar(0x016b), QLatin1Char('u'));
+    a.replace(QChar(0x016d), QLatin1Char('u'));  // ū ŭ
+    a.replace(QChar(0x0233), QLatin1Char('y'));
+    a.replace(QChar(0x045e), QLatin1Char('y'));  // ȳ ў
     if (!bdc)
     {
         // majuscule
-        a.replace(0x0100, 'A');
-        a.replace(0x0102, 'A');  // Ā Ă
-        a.replace(0x0112, 'E');
-        a.replace(0x0114, 'E');  // Ē Ĕ
-        a.replace(0x012a, 'I');
-        a.replace(0x012c, 'I');  // Ī Ĭ
-        a.replace(0x014c, 'O');
-        a.replace(0x014e, 'O');  // Ō Ŏ
-        a.replace(0x016a, 'U');
-        a.replace(0x016c, 'U');  // Ū Ŭ
-        a.replace(0x0232, 'Y');
-        a.replace(0x040e, 'Y');  // Ȳ Ў
+        a.replace(QChar(0x0100), QLatin1Char('A'));
+        a.replace(QChar(0x0102), QLatin1Char('A'));  // Ā Ă
+        a.replace(QChar(0x0112), QLatin1Char('E'));
+        a.replace(QChar(0x0114), QLatin1Char('E'));  // Ē Ĕ
+        a.replace(QChar(0x012a), QLatin1Char('I'));
+        a.replace(QChar(0x012c), QLatin1Char('I'));  // Ī Ĭ
+        a.replace(QChar(0x014c), QLatin1Char('O'));
+        a.replace(QChar(0x014e), QLatin1Char('O'));  // Ō Ŏ
+        a.replace(QChar(0x016a), QLatin1Char('U'));
+        a.replace(QChar(0x016c), QLatin1Char('U'));  // Ū Ŭ
+        a.replace(QChar(0x0232), QLatin1Char('Y'));
+        a.replace(QChar(0x040e), QLatin1Char('Y'));  // Ȳ Ў
     }
-    a.replace(0x0131, 'i');
-    a.replace(0x1ee5, 'u');
+    a.replace(QChar(0x0131), QLatin1Char('i'));
+    a.replace(QChar(0x1ee5), QLatin1Char('u'));
     // combining breve
-    a.remove(0x0306);  //ō̆ etc.
+    a.remove(QChar(0x0306));  //ō̆ etc.
     return a;
+}
+
+/**
+ * \fn Ch:chemin(QString f, char t)
+ * \brief chemin complet du fichier f, de type t
+ * 'e' = exécutable
+ * 'd' = données
+ * 'p' = données perso
+ */
+QString Ch::chemin(QString f, char t)
+{
+    Q_UNUSED(f);
+    Paths &paths = Paths::instance();
+    if (t == 'd')
+        return paths.coreDataDir();
+    if (t == 'p')
+        return paths.moduleDir();
+    return paths.userDataDir() + QStringLiteral("ext/");
 }
 
 /**
@@ -128,14 +154,14 @@ QString Ch::communes(QString g)
     if (g.contains("a") || g.contains("e") || g.contains("i") || g.contains("o") || g.contains("u") || g.contains("y"))
     {
         g.replace("a","ā̆");
-        g.replace(QRegExp("([^āăō])e"),"\\1ē̆");
-        g.replace(QRegExp("^e"),"ē̆");
+        g.replace(QRegularExpression("([^āăō])e"),"\\1ē̆");
+        g.replace(QRegularExpression("^e"),"ē̆");
         g.replace("i","ī̆");
         g.replace("o","ō̆");
-        g.replace(QRegExp("([^āēq])u"),"\\1ū̆");
-        g.replace(QRegExp("^u"),"ū̆");
-        g.replace(QRegExp("^y"),"ȳ̆");
-        g.replace(QRegExp("([^ā])y"),"\\1ȳ̆");
+        g.replace(QRegularExpression("([^āēq])u"),"\\1ū̆");
+        g.replace(QRegularExpression("^u"),"ū̆");
+        g.replace(QRegularExpression("^y"),"ȳ̆");
+        g.replace(QRegularExpression("([^ā])y"),"\\1ȳ̆");
     }
     if (maj) g[0] = g[0].toUpper();
     return g;
@@ -151,12 +177,12 @@ void Ch::deQuant(QString *c)
 {
     if (c->endsWith("\u0306"))
         c->chop(1);  // Supprimer le combining breve à la fin du mot
-    c->replace(QRegExp("[\u0101\u0103](m?)$"), "a\\1");  // ā ă
-    c->replace(QRegExp("[\u0113\u0115](m?)$"), "e\\1");
-    c->replace(QRegExp("[\u012b\u012d](m?)$"), "i\\1");
-    c->replace(QRegExp("[\u014d\u014f](m?)$"), "o\\1");
-    c->replace(QRegExp("[\u016b\u016d](m?)$"), "u\\1");
-    c->replace(QRegExp("[\u0232\u0233](m?)$"), "y\\1");
+    c->replace(QRegularExpression("[\u0101\u0103](m?)$"), "a\\1");  // ā ă
+    c->replace(QRegularExpression("[\u0113\u0115](m?)$"), "e\\1");
+    c->replace(QRegularExpression("[\u012b\u012d](m?)$"), "i\\1");
+    c->replace(QRegularExpression("[\u014d\u014f](m?)$"), "o\\1");
+    c->replace(QRegularExpression("[\u016b\u016d](m?)$"), "u\\1");
+    c->replace(QRegularExpression("[\u0232\u0233](m?)$"), "y\\1");
 }
 
 /**
@@ -170,6 +196,12 @@ QString Ch::deAccent(QString c)
     c.remove("\u0306");
     c.remove("\u0304");
     return c;
+}
+
+QChar Ch::der(QString s)
+{
+    if (s.isEmpty()) return '\0';
+    return s.at(s.count()-1);
 }
 
 /**
@@ -186,9 +218,9 @@ QString Ch::deramise(QString r)
     r.replace('v', 'u');
     r.replace("æ", "ae");
     r.replace("Æ", "Ae");
-    r.replace("œ", "oe");
-    r.replace("Œ", "Oe");
-    r.replace(0x1ee5, 'u');  // ụ le u muet de suavis, suadeo, etc...
+    //r.replace("œ", "oe");  // le latin médiéval a souvent œ pour æ
+    //r.replace("Œ", "Oe");  // utiliser vargraph pour ces ligatures
+    r.replace(QChar(0x1ee5), QLatin1Char('u'));  // ụ le u muet de suavis, suadeo, etc...
     r.replace ('V', 'U');
     return r;
 }
@@ -199,27 +231,21 @@ QString Ch::deramise(QString r)
  */
 void Ch::elide(QString *mp)
 {
-    //"Tāntāene"
-    //bool debog = (*mp == "Tāntāene");
-    //if (debog) qDebug() << "tantaene" << *mp;
     int taille = mp->size();
     if ((taille > 1) && ((mp->endsWith('m') || mp->endsWith("\u0101e")) ||
                          mp->endsWith("\u0306")) &&
         voyelles.contains(mp->at(taille - 2)))
     {
-        //if (debog) qDebug() << "cond1";
         deQuant(mp);
         mp->insert(taille - 2, '[');
         mp->append(']');
     }
     else if (voyelles.contains(mp->at(taille - 1)) && *mp != "\u014d")
     {
-        //if (debog) qDebug() << "cond2";
         deQuant(mp);
         mp->insert(taille - 1, '[');
         mp->append(']');
     }
-    //if (debog) qDebug() << *mp;
 }
 
 void Ch::genStrNum(const QString s, QString *ch, int *n)
@@ -291,36 +317,36 @@ QString Ch::versPedeCerto(QString k)
 {
     // Je remplace les longues par +, les brèves par - et les communes par *
     // minuscules
-    k.replace(0x0101, '+');
-    k.replace(0x0103, '-');  // ā ă
-    k.replace(0x0113, '+');
-    k.replace(0x0115, '-');  // ē ĕ
-    k.replace(0x012b, '+');
-    k.replace(0x012d, '-');  // ī ĭ
-    k.replace(0x014d, '+');
-    k.replace(0x014f, '-');  // ō ŏ
-    k.replace(0x016b, '+');
-    k.replace(0x016d, '-');  // ū ŭ
-    k.replace(0x0233, '+');
-    k.replace(0x045e, '-');  // ȳ ў
+    k.replace(QChar(0x0101), QLatin1Char('+'));
+    k.replace(QChar(0x0103), QLatin1Char('-'));  // ā ă
+    k.replace(QChar(0x0113), QLatin1Char('+'));
+    k.replace(QChar(0x0115), QLatin1Char('-'));  // ē ĕ
+    k.replace(QChar(0x012b), QLatin1Char('+'));
+    k.replace(QChar(0x012d), QLatin1Char('-'));  // ī ĭ
+    k.replace(QChar(0x014d), QLatin1Char('+'));
+    k.replace(QChar(0x014f), QLatin1Char('-'));  // ō ŏ
+    k.replace(QChar(0x016b), QLatin1Char('+'));
+    k.replace(QChar(0x016d), QLatin1Char('-'));  // ū ŭ
+    k.replace(QChar(0x0233), QLatin1Char('+'));
+    k.replace(QChar(0x045e), QLatin1Char('-'));  // ȳ ў
     // majuscule
-    k.replace(0x0100, '+');
-    k.replace(0x0102, '-');  // Ā Ă
-    k.replace(0x0112, '+');
-    k.replace(0x0114, '-');  // Ē Ĕ
-    k.replace(0x012a, '+');
-    k.replace(0x012c, '-');  // Ī Ĭ
-    k.replace(0x014c, '+');
-    k.replace(0x014e, '-');  // Ō Ŏ
-    k.replace(0x016a, '+');
-    k.replace(0x016c, '-');  // Ū Ŭ
-    k.replace(0x0232, '+');
-    k.replace(0x040e, '-');  // Ȳ Ў
+    k.replace(QChar(0x0100), QLatin1Char('+'));
+    k.replace(QChar(0x0102), QLatin1Char('-'));  // Ā Ă
+    k.replace(QChar(0x0112), QLatin1Char('+'));
+    k.replace(QChar(0x0114), QLatin1Char('-'));  // Ē Ĕ
+    k.replace(QChar(0x012a), QLatin1Char('+'));
+    k.replace(QChar(0x012c), QLatin1Char('-'));  // Ī Ĭ
+    k.replace(QChar(0x014c), QLatin1Char('+'));
+    k.replace(QChar(0x014e), QLatin1Char('-'));  // Ō Ŏ
+    k.replace(QChar(0x016a), QLatin1Char('+'));
+    k.replace(QChar(0x016c), QLatin1Char('-'));  // Ū Ŭ
+    k.replace(QChar(0x0232), QLatin1Char('+'));
+    k.replace(QChar(0x040e), QLatin1Char('-'));  // Ȳ Ў
     // "+" + combining breve = voyelle commune
     k.replace("+\u0306", "*");
     if (k.contains("[")) k = k.section("[", 0, 0) + "`";
     // Je garde une trace de l'élision (pour le rythme)
-    k.remove(0x1ee5);  // suppression du u-exponctué.
+    k.remove(QChar(0x1ee5));  // suppression du u-exponctué.
     k.remove(reLettres);
     return k;
 }
@@ -334,34 +360,34 @@ QString Ch::transforme(QString k)
     k.replace("Ōe", "Œ+");
     // Je remplace les longues par +, les brèves par - et les communes par *
     // minuscules
-    k.replace(0x0101, "a+");
-    k.replace(0x0103, "a-");  // ā ă
-    k.replace(0x0113, "e+");
-    k.replace(0x0115, "e-");  // ē ĕ
-    k.replace(0x012b, "i+");
-    k.replace(0x012d, "i-");  // ī ĭ
-    k.replace(0x014d, "o+");
-    k.replace(0x014f, "o-");  // ō ŏ
-    k.replace(0x016b, "u+");
-    k.replace(0x016d, "u-");  // ū ŭ
-    k.replace(0x0233, "y+");
-    k.replace(0x045e, "y-");  // ȳ ў
+    k.replace(QChar(0x0101), "a+");
+    k.replace(QChar(0x0103), "a-");  // ā ă
+    k.replace(QChar(0x0113), "e+");
+    k.replace(QChar(0x0115), "e-");  // ē ĕ
+    k.replace(QChar(0x012b), "i+");
+    k.replace(QChar(0x012d), "i-");  // ī ĭ
+    k.replace(QChar(0x014d), "o+");
+    k.replace(QChar(0x014f), "o-");  // ō ŏ
+    k.replace(QChar(0x016b), "u+");
+    k.replace(QChar(0x016d), "u-");  // ū ŭ
+    k.replace(QChar(0x0233), "y+");
+    k.replace(QChar(0x045e), "y-");  // ȳ ў
     // majuscule
-    k.replace(0x0100, "A+");
-    k.replace(0x0102, "A-");  // Ā Ă
-    k.replace(0x0112, "E+");
-    k.replace(0x0114, "E-");  // Ē Ĕ
-    k.replace(0x012a, "I+");
-    k.replace(0x012c, "I-");  // Ī Ĭ
-    k.replace(0x014c, "O+");
-    k.replace(0x014e, "O-");  // Ō Ŏ
-    k.replace(0x016a, "U+");
-    k.replace(0x016c, "U-");  // Ū Ŭ
-    k.replace(0x0232, "Y+");
-    k.replace(0x040e, "Y-");  // Ȳ Ў
+    k.replace(QChar(0x0100), "A+");
+    k.replace(QChar(0x0102), "A-");  // Ā Ă
+    k.replace(QChar(0x0112), "E+");
+    k.replace(QChar(0x0114), "E-");  // Ē Ĕ
+    k.replace(QChar(0x012a), "I+");
+    k.replace(QChar(0x012c), "I-");  // Ī Ĭ
+    k.replace(QChar(0x014c), "O+");
+    k.replace(QChar(0x014e), "O-");  // Ō Ŏ
+    k.replace(QChar(0x016a), "U+");
+    k.replace(QChar(0x016c), "U-");  // Ū Ŭ
+    k.replace(QChar(0x0232), "Y+");
+    k.replace(QChar(0x040e), "Y-");  // Ȳ Ў
     // "+" + combining breve = voyelle commune
     k.replace("+\u0306", "*");
-    k.replace(0x1ee5, "u");  // suppression du u-exponctué.
+    k.replace(QChar(0x1ee5), "u");  // suppression du u-exponctué.
     return k;
 }
 
@@ -563,7 +589,7 @@ QString Ch::ajoutSuff(QString fq, QString suffixe, QString l_etym, int accent)
                             i += 1;
                             j += 1;
                         }
-                        else if (signes.contains(fq[j]) || (fq[j] == 0x0301))
+                        else if (signes.contains(fq[j]) || (fq[j] == QChar(0x0301)))
                             j += 1;  // C'est une quantité
                         else if ((etym[i] != separSyll) && (fq[j] != separSyll))
                             OK = false;  // Les lettres ne correspondent pas.

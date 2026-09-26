@@ -3,20 +3,20 @@
  *  This file is part of COLLATINUS.
  *
  *  COLLATINUS is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Lesser GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  COLLATINVS is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  Lesser GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the Lesser GNU General Public License
  *  along with COLLATINUS; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * © Yves Ouvrard, 2009 - 2016
+ * © Yves Ouvrard, 2009 - 2019
  */
 
 #ifndef MAINWINDOW_H
@@ -30,7 +30,7 @@
 #include <QPrinter>
 
 #include "flexion.h"
-#include "lemCore.h"
+#include "lemcore.h"
 #include "dicos.h"
 #include "ch.h"
 #include "lasla.h"
@@ -44,6 +44,7 @@ class QAction;
 class QMenu;
 class QTextBrowser;
 class QTextEdit;
+class TranslationManager;
 QT_END_NAMESPACE
 
 class MainWindow;
@@ -78,7 +79,7 @@ class MainWindow : public QMainWindow
     // et second dictionnaire
     QWidget *wDic;
     // cœur
-    LemCore *_lemCore;
+    LemCore* lemcore;
     Flexion *flechisseur;
     // modules divers
     Lasla *lasla;
@@ -94,6 +95,7 @@ class MainWindow : public QMainWindow
     QTextBrowser *textBrowserFlex;
     QTextBrowser *textBrowserTag;
     QTextEdit *editeurRes();
+    QTextEdit *editeurRech;
     QLineEdit *lineEditLem;
     QLineEdit *lineEditDic;
     QLineEdit *lineEditDicW;
@@ -118,10 +120,13 @@ class MainWindow : public QMainWindow
     // Pour le serveur
     QString startServer ();
     QString stopServer ();
-
     QString lem2csv(QString texte);
-
-    void tagger(QString t, int p); // Je voudrais créer dans MainWindow l'interface du tagger.
+    // module
+	QString dirMod();
+    QString module();
+    void    setModule(QString m);
+    // tagger
+    void    tagger(QString t, int p); // Je voudrais créer dans MainWindow l'interface du tagger.
 
 
    private slots:
@@ -145,11 +150,14 @@ class MainWindow : public QMainWindow
     void closeEvent(QCloseEvent *event);
     void copie();
     void dialogueCopie();
+    void dialogueModules();
+    void editVargraph();
     void effaceRes();
     void exportPdf();
     void exportCsv();
     void flechisLigne();
     void imprimer();
+    void instModule();
     void langueInterface();
     void lancer();
     void lemmatiseLigne();
@@ -163,6 +171,7 @@ class MainWindow : public QMainWindow
     void readSettings();
     void recherche();
     void rechercheBis();
+    void save();
     void scandeLigne();
     void scandeTxt();
     void setCible();
@@ -198,6 +207,7 @@ class MainWindow : public QMainWindow
     void createStatusBar();
     void createDockWindows();
     void createDicWindow();  // second dictionnaire
+    void enrVar();           // enregistrement des variantes graphiques
     void setLangue();
 
     QMenu *fileMenu;
@@ -205,8 +215,10 @@ class MainWindow : public QMainWindow
     QMenu *viewMenu;
     QMenu *lFrEngMenu;
     QMenu *lexMenu;
-    QMenu *optMenu;
+    QMenu *modulMenu;
+    QMenu *ciblesMenu;
     QMenu *extraMenu;
+    QMenu *optMenu;
     QMenu *helpMenu;
 
     QToolBar *toolBar;
@@ -230,6 +242,12 @@ class MainWindow : public QMainWindow
     QAction *lireHyphenAct;
     QAction *actionVerba_cognita;
     QAction *verba_cognita_out;
+
+    // chemins
+    QString           resDir;
+    QString           ajDir;
+    QString           _module;
+    QString           modDir;
     // Nom du répertoire du fichier hyphen.la
     QString repHyphen;
     QString ficHyphen;
@@ -262,6 +280,7 @@ class MainWindow : public QMainWindow
     QAction *fontAct;
     QAction *findAct;
     QAction *frAct;
+    QAction *zhAct;
     QActionGroup *grCibles;
     QAction *lancAct;
     QAction *majDicAct;
@@ -272,13 +291,18 @@ class MainWindow : public QMainWindow
     QAction *printAct;
     QAction *quitAct;
     QAction *reFindAct;
+    QAction *saveAct;
     QAction *statAct;
     QAction *syncDWAct;
     QAction *syncWDAct;
     QAction *visibleWAct;
     QAction *extensionWAct;
     QAction *zoomAct;
-    // QAction *undoAct;
+    // Modules : installer, activer, désactiver, variantes graphiques
+    QAction* modInstAct;
+    QAction* modulesAct;
+    QAction* vargraphAct;
+
     // widgets, variables et fonctions du dock dictionnaires
     QComboBox *comboGlossaria;
     QPushButton *anteButton;
@@ -308,7 +332,7 @@ class MainWindow : public QMainWindow
     QString repertoire;
     // traductions
     QString langueI;
-    QTranslator *translator;
+    TranslationManager *translationManager;
     bool alerte();
 };
 

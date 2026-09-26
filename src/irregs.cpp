@@ -3,20 +3,20 @@
  *  This file is part of COLLATINUS.
  *
  *  COLLATINUS is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Lesser GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  COLLATINVS is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  Lesser GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the Lesser GNU General Public License
  *  along with COLLATINUS; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * © Yves Ouvrard, 2009 - 2016
+ * © Yves Ouvrard, 2009 - 2019
  */
 
 // TODO
@@ -57,26 +57,45 @@ Irreg::Irreg(QString l, QObject* parent)
  *        si la forme régulière calculée par le modèle
  *        est inusitée, et remplace par la forme irrégulière.
  */
-bool Irreg::exclusif() { return _exclusif; }
+bool Irreg::exclusif()
+{
+    return _exclusif;
+}
+
 /**
  * \fn QString Irreg::gr ()
  * \brief Graphie ramiste sans diacritique.
  */
-QString Irreg::gr() { return _gr; }
+QString Irreg::gr()
+{
+    return _gr;
+}
+
 /**
  * \fn QString Irreg::grq ()
  * \brief Graphie ramiset avec diacritiques.
  */
-QString Irreg::grq() { return _grq; }
+QString Irreg::grq()
+{
+    return _grq;
+}
+
 /**
  * \fn Lemme* Irreg::lemme ()
  * \brief Le lemme de l'irrégulier.
  */
-Lemme* Irreg::lemme() { return _lemme; }
+Lemme* Irreg::lemme()
+{
+    return _lemme;
+}
+
 /**
  * \fn QList<int> Irreg::morphos ()
  * \brief liste des numéros de morphos
  *        que peut prendre l'irrégulier, en
  *        tenant compte des quantités.
  */
-QList<int> Irreg::morphos() { return _morphos; }
+QList<int> Irreg::morphos()
+{
+    return _morphos;
+}

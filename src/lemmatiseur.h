@@ -3,20 +3,20 @@
  *  This file is part of COLLATINUS.
  *
  *  COLLATINUS is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the Lesser GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  COLLATINVS is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  Lesser GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the Lesser GNU General Public License
  *  along with COLLATINUS; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * © Yves Ouvrard, 2009 - 2016
+ * © Yves Ouvrard, 2009 - 2019
  */
 
 #ifndef LEMMATISEUR_H
@@ -28,7 +28,7 @@
 #include <QDebug>
 
 #include "ch.h"
-#include "lemCore.h"
+#include "lemcore.h"
 
 class Lemmatiseur : public QObject
 {
@@ -36,11 +36,13 @@ class Lemmatiseur : public QObject
 public:
     Lemmatiseur(QObject *parent = 0, LemCore *l=0, QString cible="", QString resDir="");
     // Créateur de la classe
+	void 		changeCore(LemCore *l);
     QStringList frequences(QString txt);
     QStringList lemmatiseF(QString f, bool deb);
     QString lemmatiseFichier(QString f, bool alpha = false,
                              bool cumVocibus = false, bool cumMorpho = false,
                              bool nreconnu = true);
+    MapLem lemmatiseM(QString f, bool deb);
     // lemmatiseT lemmatise un texte
     QString lemmatiseT(QString &t);
     QString lemmatiseT(QString &t, bool alpha, bool cumVocibus = false,

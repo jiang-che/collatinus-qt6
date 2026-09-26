@@ -1,0 +1,80 @@
+name: build
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  fedora:
+    name: Fedora (build + RPM)
+    runs-on: ubuntu-latest
+    container: fedora:44
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          dnf install -y rpm-build dnf-plugins-core redhat-rpm-config \
+            cmake-rpm-macros gcc-plugin-annobin desktop-file-utils appstream
+          dnf builddep -y packaging/rpm/collatinus-qt6.spec
+
+      - name: Configure and build
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+
+      - name: Smoke test
+        run: QT_QPA_PLATFORM=offscreen ./build/bin/collatinus --version
+
+      - name: Build RPMs
+        env:
+          RPMBUILD_TOPDIR: ${{ github.workspace }}/rpmbuild
+        run: scripts/build-rpm.sh
+
+      - name: Collect RPMs
+        run: |
+          mkdir -p dist
+          find rpmbuild/RPMS rpmbuild/SRPMS -name '*.rpm' -exec cp -t dist {} +
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpm
+          path: dist/*.rpm
+          if-no-files-found: error
+
+  debian:
+    name: Debian (build + .deb)
+    runs-on: ubuntu-latest
+    container: debian:trixie
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build pkgconf \
+            qt6-base-dev qt6-svg-dev qt6-tools-dev qt6-l10n-tools \
+            libquazip1-qt6-dev debhelper desktop-file-utils appstream
+
+      - name: Configure, build and smoke test
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+          QT_QPA_PLATFORM=offscreen ./build/bin/collatinus --version
+
+      - name: Build .deb
+        run: dpkg-buildpackage -us -uc -b
+
+      - name: Collect .deb
+        run: |
+          mkdir -p dist
+          cp ../collatinus-qt6_*.deb dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deb
+          path: dist/*.deb
+          if-no-files-found: error

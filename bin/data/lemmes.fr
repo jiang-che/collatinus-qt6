@@ -4,16 +4,16 @@ Français
 !This file is part of COLLATINUS and PRAELECTOR
 !COLLATINUS and PRAELECTOR are free software; you can
 !redistribute it and/or modify it under the terms of
-!the GNU General Public License as published by the Free
+!the Lesser GNU General Public License as published by the Free
 !Software Foundation; either version 2 of the License,
 !or (at your option) any later version.
 !
 !COLLATINUS is distributed in the hope that it will be useful,
 !but WITHOUT ANY WARRANTY; without even the implied warranty of
 !MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!GNU General Public License for more details.
+!Lesser GNU General Public License for more details.
 !
-!You should have received a copy of the GNU General Public License
+!You should have received a copy of the Lesser GNU General Public License
 !along with COLLATINUS; if not, write to the Free Software
 !Foundation, Inc., 59 Temple Place, Suite 3inv, Boston, MA  02111-1307  USA
 !© Yves Ouvrard, 2011 - 2017
@@ -5044,7 +5044,7 @@ consedo:apaiser entièrement
 consenesco:vieillir, languir
 consensio:accord
 consensus:accord, assentiment
-consentaneus:d'accord aver, conforme à, conséquent avec
+consentaneus:d'accord avec, conforme à, conséquent avec
 consentiens:d'accord, unanime
 consentio:être d'accord
 consequens:[gram.] bien construit, connexe, logique, raisonnable
@@ -14346,8 +14346,7 @@ neglectus:négligé, abandonné
 neglegens:distrait, peu attentif, négligent
 neglegenter:avec négligence, sans soin
 neglegentia:négligence
-neglego:négliger
-negligo:ne pas se soucier de, négliger, dédaigner, omettre
+neglego:ne pas se soucier de, négliger, dédaigner, omettre
 nego:nier
 negotiatio:négoce, commerce, entreprise [commerciale], trafic
 negotiator:négociant, marchand, trafiquant
@@ -14705,6 +14704,7 @@ nummulus:petit écu
 nummus:argent, monnaie, sesterce
 numquam:(ne...) jamais
 numquid:est-ce que
+numquis:est-ce que quelqu'un (à, de quelqu'un)
 numquidnam:est-ce que vraiment ?
 nunciam:à l'instant
 nunc:maintenant

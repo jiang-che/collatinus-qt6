@@ -1,0 +1,7 @@
+collatinus-qt6 (12.3.0-1) unstable; urgency=medium
+
+  * Initial packaging of the collatinus-qt6 modernization fork:
+    Qt 6, CMake + Ninja, QuaZip 1.x, FHS/XDG data paths,
+    Simplified-Chinese interface and morphology labels.
+
+ -- Jiang Che <jiang@fastmail.com>  Sun, 27 Sep 2026 12:00:00 +0800

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.collatinus.Collatinus</id>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>LGPL-3.0-or-later</project_license>
+
+  <name>Collatinus-Qt6</name>
+  <name xml:lang="fr">Collatinus-Qt6</name>
+  <name xml:lang="zh_CN">Collatinus-Qt6 拉丁语分析工具</name>
+
+  <summary>Latin morphology and lexical analysis</summary>
+  <summary xml:lang="fr">Analyse morphologique et lexicale du latin</summary>
+  <summary xml:lang="zh_CN">拉丁语形态与词汇分析工具</summary>
+
+  <description>
+    <p>
+      Collatinus lemmatises Latin texts: for every word it gives the canonic
+      form (lemma), the morphology (case, number, gender, person, tense,
+      mood, voice) and a translation. It can also generate inflected forms,
+      tag parts of speech and scan verse.
+    </p>
+    <p xml:lang="fr">
+      Collatinus lemmatise les textes latins : pour chaque mot, il donne la
+      forme canonique (lemme), la morphologie (cas, nombre, genre, personne,
+      temps, mode, voix) et une traduction. Il peut aussi générer les formes
+      fléchies, étiqueter les catégories grammaticales et scander les vers.
+    </p>
+    <p xml:lang="zh_CN">
+      Collatinus 对拉丁语文本进行词形还原：为每个词给出规范形式（词元）、
+      形态信息（格、数、性、人称、时态、式、语态）和释义，并可生成词形变化、
+      标注词性以及划分诗句韵律。
+    </p>
+  </description>
+
+  <launchable type="desktop-id">org.collatinus.Collatinus.desktop</launchable>
+
+  <url type="homepage">https://outils.biblissima.fr/fr/collatinus/</url>
+
+  <developer id="org.collatinus">
+    <name>Yves Ouvrard</name>
+  </developer>
+  <project_group>Collatinus</project_group>
+
+  <categories>
+    <category>Education</category>
+    <category>Languages</category>
+  </categories>
+
+  <content_rating type="oars-1.1"/>
+
+  <provides>
+    <binary>collatinus</binary>
+  </provides>
+
+  <releases>
+    <release version="12.3.0" date="2026-09-27"/>
+  </releases>
+</component>
